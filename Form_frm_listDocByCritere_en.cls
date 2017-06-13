@@ -11,8 +11,8 @@ Option Compare Database
 Option Explicit
 Dim Db As Database
 Dim rst As New ADODB.Recordset
-Dim rs1 As New ADODB.Recordset
-Dim rs2 As New ADODB.Recordset
+Dim rstType As New ADODB.Recordset
+Dim rstCritere As New ADODB.Recordset
 Dim cn As New ADODB.Connection
 Dim Status As String
 
@@ -93,9 +93,10 @@ lstDocument.Enabled = False
 'Initial values to combobox
 If cn.State = adStateOpen Then cn.Close
     Set cn = CurrentProject.AccessConnection
-    If rs1.State = adStateOpen Then rs1.Close
-    If rs2.State = adStateOpen Then rs2.Close
-    With rs1
+    If rstCritere.State = adStateOpen Then rstCritere.Close
+    If rstType.State = adStateOpen Then rstType.Close
+    
+    With rstType
         Sql = "SELECT DISTINCT  CODE_TYPE_CRITERE FROM liens "
     
         .CursorType = adOpenDynamic
@@ -103,8 +104,10 @@ If cn.State = adStateOpen Then cn.Close
         .LockType = adLockOptimistic
         .Open Sql, cn, , , adCmdText
     End With
-    With rs2
-        Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM liens "
+    
+    With rstCritere
+        'Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM liens "
+        Sql = "SELECT FROM MOTS_CLE_CRITERE order by CRITERE_MOT_CLE "
 
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
@@ -112,11 +115,18 @@ If cn.State = adStateOpen Then cn.Close
         .Open Sql, cn, , , adCmdText
     End With
 
-        Set cmbTypeID.Recordset = rs1
-        Set cmbCritereId.Recordset = rs2
-  
-        cmbTypeID.Selected(0) = True
-        cmbCritereId.Selected(0) = True
+        Set cmbTypeID.Recordset = rstType
+        Set cmbCritereId.Recordset = rstCritere
+    
+        
+        With Me.cmbTypeID
+            .Value = .ItemData(.ListIndex + 1)
+        End With
+        'cmbTypeID.Selected(0) = True
+        With Me.cmbCritereId
+            .Value = .ItemData(.ListIndex + 1)
+        End With
+        'cmbCritereId.Selected(0) = True
 
 Exit_Sub:
     Exit Sub
@@ -151,7 +161,7 @@ Private Sub cmdFind_Click()
     Dim typeId As String
     Dim critId As String
     Dim docNum As String
-    Dim natureId As String
+    Dim NatureId As String
     Dim etatId As String
     Dim i As Integer
 
