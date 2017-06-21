@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Form_frm_DocsManagement_en"
+Attribute VB_Name = "Form_frm_DocsManagement"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
@@ -11,8 +11,8 @@ Option Compare Database
 Option Explicit
 Dim Db As Database
 Dim rst As New ADODB.Recordset
-Dim rs1 As New ADODB.Recordset
-Dim rs2 As New ADODB.Recordset
+Dim rst1 As New ADODB.Recordset
+Dim rst2 As New ADODB.Recordset
 Dim cn As New ADODB.Connection
 Dim Status As String
 
@@ -30,22 +30,83 @@ On Error GoTo ErrHandler
     Dim typeId As String
     Dim critId As String
     Dim docNum As String
-
+    
+    If GB_LANG = "EN" Then
+        lblHeader.Caption = "Managing a Quality Document :"
+        lblAccord.Caption = "Customer Agreement :"
+        lblAffection.Caption = "Affectation :"
+        lblAvis.Caption = "Customer reviews :"
+        lblComment.Caption = "Comment :"
+        lblContractuel.Caption = "Contractual"
+        lblCritere.Caption = "CRITERIA (TYPE+NUMBER) :"
+        lblDelai.Caption = "Delivery time"
+        lblDiffuse.Caption = "Diffuse :"
+        lblDocNo.Caption = "N° Document :"
+        lblEtat.Caption = "Status :"
+        lblEtatDate.Caption = "Status Date :"
+        lblIndice.Caption = "Index :"
+        lblLibelle.Caption = "Wording :"
+        lblLocal.Caption = "Local(O-N) :"
+        lblMark.Caption = "Marking Part :"
+        lblNature.Caption = "Nature :"
+        lblNiveauT.Caption = "Treatment Level :"
+        lblOA.Caption = "Number OA"
+        lblOF.Caption = "Number OF"
+        lblOriginDate.Caption = "Date Origin"
+        lblProposition.Caption = "Proposal :"
+        lblTransmitted.Caption = "Transmitted for action :"
+        lblUC.Caption = "UC : "
+      
+        'list
+        lblListCritere.Caption = ""
+        lblListType.Caption = "Type"
+        
+    Else 'FR
+        lblHeader.Caption = "Gestion d'un document qualité"
+        lblAccord.Caption = "Accord Client : "
+        lblAffection.Caption = "Affectation : "
+        lblAvis.Caption = "Avis Client : "
+        lblComment.Caption = "Commentaire : "
+        lblContractuel.Caption = "Contractuel : "
+        lblCritere.Caption = "CRITERES (Type+Numéro) :"
+        lblDelai.Caption = "Délai réception : "
+        lblDiffuse.Caption = "Diffusé:"
+        lblDocNo.Caption = "N° Document :"
+        lblEtat.Caption = "Etat :"
+        lblEtatDate.Caption = "Date état : "
+        lblIndice.Caption = "Indice :"
+        lblLibelle.Caption = "Libellé : "
+        lblLocal.Caption = "Local(O-N) : "
+        lblMark.Caption = "Marquage Pièce : "
+        lblNature.Caption = "Nature :"
+        lblNiveauT.Caption = "Niveau Traitement :"
+        lblOA.Caption = "Numéro OA : "
+        lblOF.Caption = "Numéro OF : "
+        lblOriginDate.Caption = "Date Origine:"
+        lblProposition.Caption = "Proposition : "
+        lblTransmitted.Caption = "Transmitted pour action : "
+        lblUC.Caption = "UC : "
+      
+        'list
+        lblListCritere.Caption = "N ° Criterion"
+        lblListType.Caption = "Type"
+    End If
+    
     lstCritere.Enabled = False
 
     'Initial values to combobox
     If cn.State = adStateOpen Then cn.Close
         Set cn = CurrentProject.AccessConnection
-        If rs1.State = adStateOpen Then rs1.Close
-        If rs2.State = adStateOpen Then rs2.Close
-        With rs1
+        If rst1.State = adStateOpen Then rst1.Close
+        If rst2.State = adStateOpen Then rst2.Close
+        With rst1
             Sql1 = "SELECT * FROM documents where NUMERO_DOCUMENT ='" & DocNumber & "'"
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
             .Open Sql1, cn, , , adCmdText
         End With
-        With rs2
+        With rst2
             Sql2 = "SELECT CODE_TYPE_CRITERE,CRITERE_MOT_CLE FROM liens where NUMERO_DOCUMENT ='" & DocNumber & "'"
 
             .CursorType = adOpenDynamic
@@ -54,14 +115,14 @@ On Error GoTo ErrHandler
             .Open Sql2, cn, , , adCmdText
         End With
        'Record found for Document data
-        If Not (rs1.BOF And rs1.EOF) Then
-            With rs1.Fields
+        If Not (rst1.BOF And rst1.EOF) Then
+            With rst1.Fields
                 txtComment = .Item("COMMENTAIRES_SUIVI").Value
                 txtCustAgree = .Item("DATE_ACCORD_CLIENT").Value
                 txtCustReview = .Item("DATE_AVIS_CLIENT").Value
                 TxtDocNo = .Item("NUMERO_DOCUMENT").Value
                 txtEtatCode = .Item("CODE_ETAT_DOCUMENT").Value
-                txtetatDate = .Item("DATE_ETAT_DOCUMENT").Value
+                txtEtatDate = .Item("DATE_ETAT_DOCUMENT").Value
                 txtIndice = .Item("INDICE_MODIFICATION").Value
                 txtNatureCode = .Item("CODE_NATURE_DOCUMENT").Value
                 txtOA = .Item("NUMERO_OA").Value
@@ -80,18 +141,23 @@ On Error GoTo ErrHandler
                 cmbUC = .Item("CODE_UNITE").Value
             End With
         Else
-            MsgBox "Record Not Found!", vbOKOnly
+            If GB_LANG = "EN" Then
+                MsgBox "Record Not Found!", vbOKOnly
+            Else
+                MsgBox "Enregistrement non trouvé", vbOKOnly
+            End If
         End If
 
-        If Not (rs2.BOF And rs2.EOF) Then
-            Set lstCritere.Recordset = rs2
+        If Not (rst2.BOF And rst2.EOF) Then
+            Set lstCritere.Recordset = rst2
             lstCritere.Selected(0) = True
             lstCritere.Enabled = True
         Else
-            MsgBox "Record Not Found!", vbOKOnly
+            'MsgBox "Record Not Found!", vbOKOnly
             lstCritere.Enabled = False
         End If
         
+        Call LockedCtl(Me)
        
        
 
@@ -108,8 +174,8 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
-'DoCmd.OpenForm "frm_consultation_en", acNormal
-DoCmd.Close acForm, "frm_DocsManagement_en"
+'DoCmd.OpenForm "frm_consultation", acNormal
+DoCmd.Close acForm, "frm_DocsManagement"
 
 Exit_Sub:
     Exit Sub
@@ -163,7 +229,7 @@ End Sub
 Private Sub Form_Open(Cancel As Integer)
 On Error GoTo ErrHandler
 
-    DocNumber = Forms!frm_DocsManagement_en.OpenArgs
+    DocNumber = Forms!frm_DocsManagement.OpenArgs
     Call ClearAll(Me)
 
 '    If Len(DocNumber) > 0 Then

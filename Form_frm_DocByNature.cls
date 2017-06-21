@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Form_frm_DocByNature_en"
+Attribute VB_Name = "Form_frm_DocByNature"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
@@ -14,10 +14,12 @@ Dim rstNature As New ADODB.Recordset
 Dim rstEtatdate As New ADODB.Recordset
 Dim rstDate As New ADODB.Recordset
 Dim rstComment As New ADODB.Recordset
+Dim rst As New ADODB.Recordset
 Dim cn As New ADODB.Connection
 Dim Status As String
 
 Dim moreSql As String
+Dim publicSql As String
 
 Function CheckValid() As Boolean
 On Error GoTo ErrHandler
@@ -26,7 +28,14 @@ On Error GoTo ErrHandler
     
     If IsNull(cmbNatureID.Value) Or (cmbNatureID.Value = "") Or (cmbNatureID.ListIndex = -1) Then
         CheckValid = False
-        MsgBox "Please Choose Nature Code", vbOKOnly
+        
+        If GB_LANG = "EN" Then
+             MsgBox "Invalid Nature Code", vbOKOnly
+        Else
+            MsgBox "Invalide Nature", vbOKOnly
+        End If
+        
+        cmbNatureID.SetFocus
         Exit Function
     Else
     If Not IsNull(cmbEtatStart.Value) Or Not (cmbEtatStart.Value = "") Or Not (cmbEtatStart.ListIndex = -1) Then
@@ -62,9 +71,40 @@ On Error GoTo ErrHandler
     Dim i As Integer
 
     'Clear Variable
-    RPT_TITLE = ""
+    GB_RPT_TITLE = ""
     'Clear all Controls
     Call ClearAll(Me)
+    
+    If GB_LANG = "EN" Then
+        lblHeader.Caption = "Documents of a Nature"
+        lblBox1.Caption = "Required information :"
+        lblbox2.Caption = "Optional information :"
+        lblComment.Caption = "Comment : "
+        lblDate.Caption = "Date"
+        lblEStart.Caption = "start : "
+        lblEStop.Caption = "end : "
+        lblEtat.Caption = "Status : "
+        lblNature.Caption = "Nature Code : "
+        lblStart.Caption = "start : "
+        lblStop.Caption = "end : "
+        
+        
+    Else 'FR
+        lblHeader.Caption = "Documents d'une nature"
+        lblBox1.Caption = "Informations obligatoires :"
+        lblbox2.Caption = "Informations facultatives :"
+        lblComment.Caption = "Commentaires : "
+        lblDate.Caption = "Date"
+        lblEStart.Caption = "début : "
+        lblEStop.Caption = "fin : "
+        lblEtat.Caption = "Etat : "
+        lblNature.Caption = "Nature : "
+        lblStart.Caption = "début : "
+        lblStop.Caption = "fin : "
+    End If
+    
+    
+    
     'Initial values to combobox
         If cn.State = adStateOpen Then cn.Close
         Set cn = CurrentProject.AccessConnection
@@ -81,19 +121,20 @@ On Error GoTo ErrHandler
             .LockType = adLockOptimistic
             .Open Sql, cn, , , adCmdText
         End With
+        Set cmbNatureID.Recordset = rstNature
         
-        i = 0
-        Do While Not rstNature.EOF
-            With rstNature
-                cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value)
-'                cmbNatureID.List(i, 0) = .Fields("CODE_NATURE_DOCUMENT").Value
-'                cmbNatureID.Column(i, 1) = .Fields("LIBELLE_NATURE_DOCUMENT").Value
-               ' cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value & " : " & .Fields("LIBELLE_NATURE_DOCUMENT").Value)
-                i = i + 1
-                rstNature.MoveNext
-            End With
-            
-        Loop
+'        i = 0
+'        Do While Not rstNature.EOF
+'            With rstNature
+'                cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value)
+''                cmbNatureID.List(i, 0) = .Fields("CODE_NATURE_DOCUMENT").Value
+''                cmbNatureID.Column(i, 1) = .Fields("LIBELLE_NATURE_DOCUMENT").Value
+'               ' cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value & " : " & .Fields("LIBELLE_NATURE_DOCUMENT").Value)
+'                i = i + 1
+'                rstNature.MoveNext
+'            End With
+'
+'        Loop
        'Etat Date
         With rstEtatdate
             Sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
@@ -156,8 +197,8 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
-    DoCmd.OpenForm "frm_workRequest_en", acNormal
-    DoCmd.Close acForm, "frm_DocByNature_en"
+    DoCmd.OpenForm "frm_workRequest", acNormal
+    DoCmd.Close acForm, "frm_DocByNature"
 
 Exit_Sub:
     Exit Sub
@@ -168,29 +209,80 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+Private Sub BuildSql()
+On Error GoTo ErrHandler
+
+    Dim NatureID As String
+
+    NatureID = cmbNatureID.Value
+    publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
+                            "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
+                            "FROM DOCUMENTS WHERE CODE_NATURE_DOCUMENT ='" & NatureID & "'" & moreSql & _
+                            "ORDER BY NUMERO_DOCUMENT"
+
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
 Private Sub cmdPrint_Click()
 On Error GoTo ErrHandler
-    Dim NatureId As String
+    
     Dim rep As Report
+     Dim NatureID As String
+    
       
     If CheckValid() Then
-        NatureId = cmbNatureID.Value
-    
-        DoCmd.OpenReport "rpt_DocsByNature_en", acViewDesign
-        Set rep = Reports!rpt_DocsByNature_en
+        NatureID = cmbNatureID.Value
+       
         
-        rep.RecordSource = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
-                            "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
-                            "FROM DOCUMENTS WHERE CODE_NATURE_DOCUMENT ='" & NatureId & "'" & moreSql & _
-                            "ORDER BY NUMERO_DOCUMENT"
-               
-        RPT_TITLE = Nz(cmbNatureID.Value, "-") & ";" & Nz(cmbEtatStart.Value, "-") & ";" & Nz(cmbEtatStop.Value, "-") & _
-        Nz(cmbStart.Value, "-") & ";" & Nz(cmbStop.Value, "-") & ";" & Nz(cmbComment.Value, "-") & ";"
+        If cn.State = adStateOpen Then cn.Close
+            Set cn = CurrentProject.AccessConnection
+            If rst.State = adStateOpen Then rst.Close
+
+            With rst
+
+                Call BuildSql
+
+                .CursorType = adOpenDynamic
+                .CursorLocation = adUseClient
+                .LockType = adLockOptimistic
+                .Open publicSql, cn, , , adCmdText
+            End With
+
+            'Record Found
+            If Not (rst.BOF And rst.EOF) Then
+            
+                CurrentDb.QueryDefs("qry_DocByNature").Sql = publicSql
+                GB_RPT_TITLE = Nz(cmbNatureID.Value, "-") & ";" & _
+                    Nz(cmbEtatStart.Value, "-") & ";" & _
+                    Nz(cmbEtatStop.Value, "-") & ";" & _
+                    Nz(cmbStart.Value, "-") & ";" & _
+                    Nz(cmbStop.Value, "-") & ";" & _
+                    Nz(cmbComment.Value, "-") & ";"
     
-        DoCmd.OpenReport "rpt_DocsByNature_en", acViewPreview
-        
+                DoCmd.OpenReport "rpt_DocsByNature", acViewPreview
+    
+            Else
+
+                If GB_LANG = "EN" Then
+                    MsgBox "Record Not Found!", vbOKOnly
+
+                Else
+                    MsgBox "Enregistrement non trouvé", vbOKOnly
+                End If
+                'Call ClearAll(Me)
+                cmbNatureID.SetFocus
+            End If
+  
         'Close/Open Form?
-        'DoCmd.Close acForm, "frm_DocByNature_en"
+        'DoCmd.Close acForm, "frm_DocByNature"
     End If
 
 
@@ -204,6 +296,8 @@ ErrHandler:
 Resume Exit_Sub
 
 End Sub
+
+
 
 Private Sub Form_Load()
     On Error GoTo ErrHandler

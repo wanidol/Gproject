@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Form_frm_listDocByID_en"
+Attribute VB_Name = "Form_frm_listDocByID"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
@@ -29,9 +29,15 @@ On Error GoTo ErrHandler
 '3. no nature no etat
     
     
-    If IsNull(cmbDocId.Value) Or (cmbDocId.Value = "") Then
+    If IsNull(cmbDocId.Value) Or (cmbDocId.Value = "") Or (cmbDocId.ListIndex = -1) Then
         CheckValid = False
-        MsgBox "Please Choose A Document Number", vbOKOnly
+        If GB_LANG = "EN" Then
+            MsgBox "Invalid Document Number ", vbOKOnly
+        Else
+            MsgBox "Invalide Numéro De Document  ", vbOKOnly
+        End If
+        
+        cmbDocId.SetFocus
         Exit Function
     Else
         CheckValid = True
@@ -56,27 +62,60 @@ On Error GoTo ErrHandler
 
 'Clear all Controls
 
-Call ClearAll(Me)
-DocumentKey = ""
-lstDocument.Enabled = False
+    Call ClearAll(Me)
+
+    If GB_LANG = "EN" Then
+        lblHeader.Caption = "Follow-up Document"
+        lblDocID.Caption = "Document Number : "
+        
+        'list
+        lblListDoc.Caption = "Document Number"
+        lblListNature.Caption = "Nature"
+        lblListEtat.Caption = "Status"
+        lblListInd.Caption = "Index"
+        lblListEtatDate.Caption = "Status Date"
+        lblListDesc.Caption = "Description"
+        lblListOriginDate.Caption = "Original Date"
+        
+    Else 'FR
+        lblHeader.Caption = "Consultation Suivi Document"
+        lblDocID.Caption = "N° de Document : "
+    
+        
+        'list
+        lblListDoc.Caption = "N° Document"
+        lblListNature.Caption = "Nature"
+        lblListEtat.Caption = "Etat"
+        lblListInd.Caption = "Ind"
+        lblListEtatDate.Caption = "Date état"
+        lblListDesc.Caption = "Libellé du document"
+        lblListOriginDate.Caption = "Origine"
+    End If
+
+    DocumentKey = ""
+    lstDocument.Enabled = False
 
 
 
 
-If cn.State = adStateOpen Then cn.Close
+    If cn.State = adStateOpen Then cn.Close
         Set cn = CurrentProject.AccessConnection
         If rs1.State = adStateOpen Then rs1.Close
         
         With rs1
-            Sql = "SELECT NUMERO_DOCUMENT FROM DOCUMENTS "
+            Sql = "SELECT NUMERO_DOCUMENT FROM DOCUMENTS ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
             .Open Sql, cn, , , adCmdText
         End With
         Set cmbDocId.Recordset = rs1
-        cmbDocId.Selected(0) = True
+        'cmbDocId.Selected(0) = True
         
+        With Me.cmbDocId
+            .Value = .ItemData(.ListIndex + 1)
+        End With
+        cmbDocId.SetFocus
 
 Exit_Sub:
     Exit Sub
@@ -88,10 +127,14 @@ Resume Exit_Sub
 
 End Sub
 
+'Private Sub cmbDocID_Change()
+'Call ClearAll
+'End Sub
+
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
-DoCmd.OpenForm "frm_consultation_en", acNormal
-DoCmd.Close acForm, "frm_listDocByID_en"
+DoCmd.OpenForm "frm_consultation", acNormal
+DoCmd.Close acForm, "frm_listDocByID"
 
 Exit_Sub:
     Exit Sub
@@ -111,8 +154,8 @@ On Error GoTo ErrHandler
 
     If CheckValid() Then
         docNum = cmbDocId.Value
-'        natureId = txtCodeNature.Value
-'        etatId = txtEtatCode.Value
+'        natureId = cmbNatureID.Value
+'        etatId = cmbEtatID.Value
     
       
         If cn.State = adStateOpen Then cn.Close
@@ -141,8 +184,17 @@ On Error GoTo ErrHandler
                 lstDocument.Enabled = True
     
             Else
-                MsgBox "Record Not Found!", vbOKOnly
+            
+                If GB_LANG = "EN" Then
+                    MsgBox "Record Not Found!", vbOKOnly
+                                    
+                Else
+                    MsgBox "Enregistrement non trouvé", vbOKOnly
+                End If
+                'MsgBox "Record Not Found!", vbOKOnly
+                'Call ClearAll(Me)
                 lstDocument.Enabled = False
+                cmbDocId.SetFocus
  
             End If
       
@@ -180,20 +232,20 @@ Private Sub lstDocument_DblClick(Cancel As Integer)
 On Error GoTo ErrHandler
 Dim passData As String
 
-'passing document number for retriving data in frm_DocsManagement
-passData = lstDocument.Column(0)
-
-
-'for back to previous page
-
-PreviousForm = ""
-
-PreviousForm = Me.Name
-
-DoCmd.OpenForm "frm_DocsManagement_en", acNormal, , , acFormReadOnly, , passData
-
-'Hiding form
-Me.Visible = False
+    'passing document number for retriving data in frm_DocsManagement
+    passData = lstDocument.Column(0)
+    
+    
+    'for back to previous page
+    
+    PreviousForm = ""
+    
+    PreviousForm = Me.Name
+    
+    DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
+    
+    'Hiding form
+    Me.Visible = False
 
 
 Exit_Sub:

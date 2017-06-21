@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Form_frm_listDocByCritere_en"
+Attribute VB_Name = "Form_frm_listDocByCritere"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
@@ -13,6 +13,8 @@ Dim Db As Database
 Dim rst As New ADODB.Recordset
 Dim rstType As New ADODB.Recordset
 Dim rstCritere As New ADODB.Recordset
+Dim rstEtat As New ADODB.Recordset
+Dim rstNature As New ADODB.Recordset
 Dim cn As New ADODB.Connection
 Dim Status As String
 
@@ -29,37 +31,62 @@ On Error GoTo ErrHandler
 '3. no nature no etat
     
     
-    If IsNull(cmbTypeID.Value) Or (cmbTypeID.Value = "") Then
+    If IsNull(cmbTypeID.Value) Or (cmbTypeID.Value = "") Or (cmbTypeID.ListIndex = -1) Then
         CheckValid = False
-        MsgBox "Please Choose A Type Code", vbOKOnly
+        
+        If GB_LANG = "FR" Then
+            MsgBox "Type Invalide", vbOKOnly
+        Else
+            MsgBox "Invalid Type Code", vbOKOnly
+        End If
+        
+        cmbTypeID.SetFocus
         Exit Function
     Else
-        If IsNull(cmbCritereId.Value) Or (cmbCritereId.Value = "") Then
+        If IsNull(cmbCritereId.Value) Or (cmbCritereId.Value = "") Or (cmbCritereId.ListIndex = -1) Then
             CheckValid = False
-            MsgBox "Please Choose A Criteria Code", vbOKOnly
+            
+            If GB_LANG = "FR" Then
+                MsgBox " N° Citère Invalide", vbOKOnly
+            Else
+                MsgBox "Invalid Criteria Code", vbOKOnly
+            End If
+            
+            cmbCritereId.SetFocus
             Exit Function
         Else
-            If IsNull(txtCodeNature.Value) Or (txtCodeNature.Value = "") Then
-                If IsNull(txtEtatCode.Value) Or (txtEtatCode.Value = "") Then
+            If IsNull(cmbNatureID.Value) Or (cmbNatureID.Value = "") Or (cmbNatureID.ListIndex = -1) Then
+                If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Or (cmbEtatID.ListIndex = -1) Then
                 'case 3. no nature no etat
-                   CheckValid = False
-                    MsgBox "Please Input Nature Code And/Or Etat Code", vbOKOnly
+                    CheckValid = False
+                    If GB_LANG = "FR" Then
+                        MsgBox "Saisissez Le Code De La Nature Et/Ou Le Code De L'Etat", vbOKOnly
+                    Else
+                        MsgBox "Please Input Nature Code And/Or Etat Code", vbOKOnly
+                    End If
+                    
+                    If (cmbNatureID.ListIndex = -1) Then
+                        cmbNatureID.SetFocus
+                    Else
+                        cmbEtatID.SetFocus
+                    End If
+                    
                     Exit Function
                 Else
                     'case 1.1 nature no etat ok
-                    moreSql = " d.CODE_ETAT_DOCUMENT = '" & Trim(txtEtatCode.Value) & "'"
+                    moreSql = " d.CODE_ETAT_DOCUMENT = '" & cmbEtatID.Value & "'"
 '                    Debug.Print moreSql
                     CheckValid = True
                 End If
             Else
                 'case 1.2 nature ok etat no
-                If IsNull(txtEtatCode.Value) Or (txtEtatCode.Value = "") Then
-                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & Trim(txtCodeNature.Value) & "'"
+                If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Then
+                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
 '                    Debug.Print moreSql
                 Else
                 'case 2. nature ok etat ok
-                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & Trim(txtCodeNature.Value) & "'" & _
-                                " And d.CODE_ETAT_DOCUMENT = '" & Trim(txtEtatCode.Value) & "'"
+                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'" & _
+                                " And d.CODE_ETAT_DOCUMENT = '" & cmbEtatID.Value & "'"
 '                    Debug.Print moreSql
                 End If
                 CheckValid = True
@@ -87,6 +114,40 @@ On Error GoTo ErrHandler
 
 'Clear all Controls
 Call ClearAll(Me)
+    If GB_LANG = "EN" Then
+        lblHeader.Caption = "Liste des documents liés à un critère d'accès"
+        lblTypeCode.Caption = "Type :"
+        lblCritCode.Caption = "Criteria Code :"
+        lblNature.Caption = "Nature :"
+        lblEtat.Caption = "Status :"
+        
+        'list
+        lblListDoc.Caption = "Document Number"
+        lblListNature.Caption = "Nature"
+        lblListEtat.Caption = "Status"
+        lblListInd.Caption = "Index"
+        lblListEtatDate.Caption = "Status Date"
+        lblListDesc.Caption = "Description"
+        lblListOriginDate.Caption = "Original Date"
+        
+    Else 'FR
+        lblHeader.Caption = "Liste des documents liés à un critère d'accès"
+        lblTypeCode.Caption = "Type :"
+        lblCritCode.Caption = "N° critère :"
+        lblNature.Caption = "Nature :"
+        lblEtat.Caption = "Etat :"
+        
+        'list
+        lblListDoc.Caption = "N° Document"
+        lblListNature.Caption = "Nature"
+        lblListEtat.Caption = "Etat"
+        lblListInd.Caption = "Ind"
+        lblListEtatDate.Caption = "Date état"
+        lblListDesc.Caption = "Libellé du document"
+        lblListOriginDate.Caption = "Origine"
+    End If
+
+
 DocumentKey = ""
 lstDocument.Enabled = False
 
@@ -106,27 +167,45 @@ If cn.State = adStateOpen Then cn.Close
     End With
     
     With rstCritere
-        'Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM liens "
-        Sql = "SELECT FROM MOTS_CLE_CRITERE order by CRITERE_MOT_CLE "
-
+    
+        Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
         .Open Sql, cn, , , adCmdText
     End With
-
-        Set cmbTypeID.Recordset = rstType
-        Set cmbCritereId.Recordset = rstCritere
+    
+     With rstNature
+        Sql = "SELECT CODE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+        .CursorType = adOpenDynamic
+        .CursorLocation = adUseClient
+        .LockType = adLockOptimistic
+        .Open Sql, cn, , , adCmdText
+    End With
+    
+    
+    With rstEtat
+        Sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
+        .CursorType = adOpenDynamic
+        .CursorLocation = adUseClient
+        .LockType = adLockOptimistic
+        .Open Sql, cn, , , adCmdText
+    End With
+    
+    Set cmbEtatID.Recordset = rstEtat
+    Set cmbTypeID.Recordset = rstType
+    Set cmbCritereId.Recordset = rstCritere
+    Set cmbNatureID.Recordset = rstNature
     
         
         With Me.cmbTypeID
             .Value = .ItemData(.ListIndex + 1)
         End With
-        'cmbTypeID.Selected(0) = True
         With Me.cmbCritereId
             .Value = .ItemData(.ListIndex + 1)
         End With
-        'cmbCritereId.Selected(0) = True
+        
+        cmbTypeID.SetFocus
 
 Exit_Sub:
     Exit Sub
@@ -142,8 +221,8 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
-DoCmd.OpenForm "frm_consultation_en", acNormal
-DoCmd.Close acForm, "frm_listDocByCritere_en"
+    DoCmd.OpenForm "frm_consultation", acNormal
+    DoCmd.Close acForm, "frm_listDocByCritere"
 
 Exit_Sub:
     Exit Sub
@@ -161,7 +240,7 @@ Private Sub cmdFind_Click()
     Dim typeId As String
     Dim critId As String
     Dim docNum As String
-    Dim NatureId As String
+    Dim NatureID As String
     Dim etatId As String
     Dim i As Integer
 
@@ -169,33 +248,18 @@ Private Sub cmdFind_Click()
     If CheckValid() Then
         typeId = cmbTypeID.Value
         critId = cmbCritereId.Value
-'        natureId = txtCodeNature.Value
-'        etatId = txtEtatCode.Value
-    
-      
+     
         If cn.State = adStateOpen Then cn.Close
             Set cn = CurrentProject.AccessConnection
             If rst.State = adStateOpen Then rst.Close
             With rst
-            'select * from documents inner join (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='MIC'and CRITERE_MOT_CLE ='17010') doc_num  On documents.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT ;
-            'code_type_critere='MIC' and critere_mot_cle='21437';
-            'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS WHERE NUMERO_DOCUMENT IN (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='PQP'and CRITERE_MOT_CLE ='PQPF19972330') And CODE_NATURE_DOCUMENT = 'RLM' ORDER BY NUMERO_DOCUMENT
-        
-            'select d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT,d.CODE_ETAT_DOCUMENT,d.INDICE_MODIFICATION,d.DATE_ETAT_DOCUMENT,d.LIBELLE_DOCUMENT,d.DATE_ORIGINE_DOCUMENT
-            'from documents d  Inner join (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='PQP'and CRITERE_MOT_CLE ='PQRF19972330') doc_num  On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT ;
+            
             Sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
                     "d.CODE_ETAT_DOCUMENT,d.INDICE_MODIFICATION," & _
                     "d.DATE_ETAT_DOCUMENT,d.LIBELLE_DOCUMENT,d.DATE_ORIGINE_DOCUMENT " & _
                     "FROM DOCUMENTS d Inner join (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeId & "' And CRITERE_MOT_CLE ='" & critId & "') doc_num " & _
                     "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
-                    "WHERE " & moreSql & ""
-'                Sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
-'                    "CODE_ETAT_DOCUMENT,INDICE_MODIFICATION," & _
-'                    "DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
-'                    "FROM DOCUMENTS WHERE NUMERO_DOCUMENT IN " & _
-'                    "(Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeId & "'" & _
-'                     "and CRITERE_MOT_CLE ='" & critId & "')" & moreSql & " ORDER BY NUMERO_DOCUMENT"
-'                    "and CRITERE_MOT_CLE ='" & critId & "') And CODE_NATURE_DOCUMENT ='PQP' and CODE_ETAT_DOCUMENT='FM' ORDER BY NUMERO_DOCUMENT"
+                    "WHERE " & moreSql & " ORDER BY d.NUMERO_DOCUMENT"
 
                 .CursorType = adOpenDynamic
                 .CursorLocation = adUseClient
@@ -210,8 +274,18 @@ Private Sub cmdFind_Click()
                 lstDocument.Enabled = True
     
             Else
-                MsgBox "Record Not Found!", vbOKOnly
+            
+                If GB_LANG = "EN" Then
+                    MsgBox "Record Not Found!", vbOKOnly
+                Else
+                    MsgBox "Enregistrement non trouvé", vbOKOnly
+                End If
+            
+            
+                'MsgBox "Record Not Found!", vbOKOnly
+                'Call ClearAll(Me)
                 lstDocument.Enabled = False
+                cmbTypeID.SetFocus
  
             End If
       
@@ -248,20 +322,20 @@ Private Sub lstDocument_DblClick(Cancel As Integer)
 On Error GoTo ErrHandler
 Dim passData As String
 
-'passing document number for retriving data in frm_DocsManagement
-passData = lstDocument.Column(0)
+    'passing document number for retriving data in frm_DocsManagement
+    passData = lstDocument.Column(0)
 
 
-'for back to previous page
+    'for back to previous page
 
-PreviousForm = ""
+    PreviousForm = ""
 
-PreviousForm = Me.Name
+    PreviousForm = Me.Name
 
-DoCmd.OpenForm "frm_DocsManagement_en", acNormal, , , acFormReadOnly, , passData
+    DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
 
-'Hiding form
-Me.Visible = False
+    'Hiding form
+    Me.Visible = False
 
 
 

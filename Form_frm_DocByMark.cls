@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Form_frm_DocByMark_en"
+Attribute VB_Name = "Form_frm_DocByMark"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
@@ -10,6 +10,7 @@ Attribute VB_Exposed = False
 Option Compare Database
 Option Explicit
 Dim Db As Database
+Dim rst As New ADODB.Recordset
 Dim rstMark As New ADODB.Recordset
 Dim rstNature As New ADODB.Recordset
 Dim rstEtatdate As New ADODB.Recordset
@@ -20,21 +21,31 @@ Dim cn As New ADODB.Connection
 Dim Status As String
 
 Dim moreSql As String
-Dim NatureId As String
+Dim NatureID As String
 Dim CritereId As String
+Dim publicSql As String
 
 Function CheckValid() As Boolean
 On Error GoTo ErrHandler
 
+    moreSql = ""
         
     If IsNull(cmbMarkID.Value) Or (cmbMarkID.Value = "") Or (cmbMarkID.ListIndex = -1) Then
         CheckValid = False
-        MsgBox "Please Choose Mark Code", vbOKOnly
+        
+        If GB_LANG = "EN" Then
+            MsgBox "Invalid Mark Code", vbOKOnly
+        Else
+            MsgBox "Invalide N° de marquage", vbOKOnly
+        End If
+        
+        cmbMarkID.SetFocus
+        
         Exit Function
     Else
         If Not IsNull(cmbNatureID.Value) Or Not (cmbNatureID.Value = "") Or Not (cmbNatureID.ListIndex = -1) Then
             'moreSql = " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
-             NatureId = cmbNatureID.Value
+             NatureID = cmbNatureID.Value
        
         End If
         
@@ -75,13 +86,42 @@ On Error GoTo ErrHandler
     Dim docNum As String
 
     'Clear Variable
-    RPT_TITLE = ""
+    GB_RPT_TITLE = ""
     moreSql = ""
-    NatureId = ""
+    NatureID = ""
     CritereId = ""
     
     'Clear all Controls
     Call ClearAll(Me)
+    
+   If GB_LANG = "EN" Then
+        lblHeader.Caption = "List of documents of a part marking"
+        lblBox1.Caption = "Informations obligatoires :"
+        lblbox2.Caption = "Informations facultatives :"
+        lblComment.Caption = "Comment : "
+        lblDate.Caption = "Date"
+        lblEStart.Caption = "start : "
+        lblEStop.Caption = "end : "
+        lblEtat.Caption = "Status : "
+        lblNature.Caption = "Nature Code : "
+        lblStart.Caption = "start : "
+        lblStop.Caption = "end : "
+        lblCritere.Caption = "Criteria : "
+        
+    Else 'FR
+        lblHeader.Caption = "Liste des documents d'un marquage de pièce"
+        lblBox1.Caption = "Informations obligatoires :"
+        lblbox2.Caption = "Informations facultatives :"
+        lblComment.Caption = "Commentaires : "
+        lblDate.Caption = "Date"
+        lblEStart.Caption = "début : "
+        lblEStop.Caption = "fin : "
+        lblEtat.Caption = "Etat : "
+        lblNature.Caption = "Nature Code : "
+        lblStart.Caption = "début : "
+        lblStop.Caption = "fin : "
+        lblCritere.Caption = "Critères : "
+    End If
     
     'Initial values to combobox
     If cn.State = adStateOpen Then cn.Close
@@ -157,7 +197,7 @@ On Error GoTo ErrHandler
         
        'critere
        With rstCritere
-        Sql = "SELECT CRITERE_MOT_CLE FROM MOTS_CLE_CRITERE order by CRITERE_MOT_CLE "
+        Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
@@ -188,8 +228,8 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
-    DoCmd.OpenForm "frm_workRequest_en", acNormal
-    DoCmd.Close acForm, "frm_DocByMark_en"
+    DoCmd.OpenForm "frm_workRequest", acNormal
+    DoCmd.Close acForm, "frm_DocByMark"
 
 
 Exit_Sub:
@@ -201,74 +241,115 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+Private Sub BuildSql()
+On Error GoTo ErrHandler
+Dim MarkId As String
+
+    publicSql = ""
+    MarkId = cmbMarkID.Value
+   
+    If (NatureID = "") And (CritereId = "") Then
+                    
+        publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
+            "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE " & _
+            "FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "' ORDER BY NUMERO_DOCUMENT"
+    Else
+        'case inner join both
+        If (NatureID <> "") And (CritereId <> "") Then
+            publicSql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
+                    "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
+                    "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT,d.CODE_REPERE_MARQUAGE " & _
+                    "FROM DOCUMENTS d " & _
+                    "INNER JOIN (Select NUMERO_DOCUMENT from Liens " & _
+                    "WHERE CODE_NATURE_DOCUMENT='" & NatureID & "'" & _
+                    "And CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
+                    "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
+                    "WHERE d.CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
+                    " ORDER BY d.NUMERO_DOCUMENT"
+        Else
+        'case inner join by critere
+            If (NatureID = "") And (CritereId <> "") Then
+                publicSql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
+                        "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
+                        "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT,d.CODE_REPERE_MARQUAGE " & _
+                        "FROM DOCUMENTS d " & _
+                        "INNER JOIN (Select NUMERO_DOCUMENT from Liens " & _
+                        "WHERE CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
+                        "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
+                        "WHERE d.CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
+                        " ORDER BY d.NUMERO_DOCUMENT"
+            Else
+            'case inner join by nature
+                publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
+                    "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE " & _
+                    "FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "'" & _
+                    " AND CODE_NATURE_DOCUMENT = '" & NatureID & "' " & _
+                    "ORDER BY NUMERO_DOCUMENT"
+            End If
+        End If
+    End If
+
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
 Private Sub cmdPrint_Click()
 On Error GoTo ErrHandler
-    Dim MarkId As String
-    Dim Sql As String
+   'Dim MarkId As String
+   Dim rptSql As String
+   
     Dim rep As Report
       
     If CheckValid() Then
-        Sql = ""
-        MarkId = cmbMarkID.Value
-   
-        DoCmd.OpenReport "rpt_DocsByMark_en", acViewDesign
+        If cn.State = adStateOpen Then cn.Close
+        Set cn = CurrentProject.AccessConnection
+        If rst.State = adStateOpen Then rst.Close
+
+        With rst
         
-        Set rep = Reports!rpt_DocsByMark_en
-        
-        'query by only mark code
-        If (NatureId = "") And (CritereId = "") Then
-            Sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
-                        "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
-                        "FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "' ORDER BY NUMERO_DOCUMENT"
-        Else
-        'case inner join both
-            If (NatureId <> "") And (CritereId <> "") Then
-                Sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
-                            "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
-                            "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT " & _
-                            "FROM DOCUMENTS d " & _
-                            "INNER JOIN (Select NUMERO_DOCUMENT from Liens" & _
-                            "WHERE CODE_NATURE_DOCUMENT='" & NatureId & "'" & _
-                            "And CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
-                            "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
-                            "WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
-                            " ORDER BY NUMERO_DOCUMENT"
-            Else
-            'case inner join by Nature
-                If (NatureId = "") And (CritereId <> "") Then
-                    Sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
-                            "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
-                            "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT " & _
-                            "FROM DOCUMENTS d " & _
-                            "INNER JOIN (Select NUMERO_DOCUMENT from Liens " & _
-                            "WHERE CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
-                            "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
-                            "WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
-                            " ORDER BY NUMERO_DOCUMENT"
-                Else
-                'case inner join by Critere
-                    Sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
-                            "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
-                            "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT " & _
-                            "FROM DOCUMENTS d " & _
-                            "INNER JOIN (Select NUMERO_DOCUMENT from Liens where CODE_NATURE_DOCUMENT='" & NatureId & "') doc_num " & _
-                            "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
-                            "WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
-                            " ORDER BY NUMERO_DOCUMENT"
-                End If
-            End If
+            Call BuildSql
             
-        End If
-        
-        rep.RecordSource = Sql
-                            
-        RPT_TITLE = Nz(cmbMarkID.Value, "-") & ";" & Nz(cmbNatureID.Value, "-") & ";" & Nz(cmbEtatStart.Value, "-") & ";" & Nz(cmbEtatStop.Value, "-") & ";" & _
-        Nz(cmbStart.Value, "-") & ";" & Nz(cmbStop.Value, "-") & ";" & Nz(cmbComment.Value, "-") & ";" & Nz(cmbCritere.Value, "-") & ";"
-    
-        DoCmd.OpenReport "rpt_DocsByMark_en", acViewPreview
-        
+            .CursorType = adOpenDynamic
+            .CursorLocation = adUseClient
+            .LockType = adLockOptimistic
+            .Open publicSql, cn, , , adCmdText
+            End With
+
+            'Record Found
+            If Not (rst.BOF And rst.EOF) Then
+            
+                CurrentDb.QueryDefs("qry_DocByMark").Sql = publicSql
+                
+                GB_RPT_TITLE = Nz(cmbMarkID.Value, "-") & ";" & _
+                    Nz(cmbNatureID.Value, "-") & ";" & _
+                    Nz(cmbEtatStart.Value, "-") & ";" & _
+                    Nz(cmbEtatStop.Value, "-") & ";" & _
+                    Nz(cmbStart.Value, "-") & ";" & _
+                    Nz(cmbStop.Value, "-") & ";" & _
+                    Nz(cmbComment.Value, "-") & ";" & _
+                    Nz(cmbCritere.Value, "-") & ";"
+               
+                DoCmd.OpenReport "rpt_DocsByMark", acViewPreview
+            
+            Else
+                If GB_LANG = "EN" Then
+                    MsgBox "Record Not Found!", vbOKOnly
+                Else
+                    MsgBox "Enregistrement non trouvé", vbOKOnly
+                End If
+                'Call ClearAll(Me)
+                cmbMarkID.SetFocus
+            End If
+               
         'Close/Open Form?
-        'DoCmd.Close acForm, "frm_DocByNature_en"
+        'DoCmd.Close acForm, "frm_DocByMark"
     End If
 
 
