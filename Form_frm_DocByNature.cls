@@ -27,7 +27,7 @@ On Error GoTo ErrHandler
     moreSql = ""
     
     If IsNull(cmbNatureID.Value) Or (cmbNatureID.Value = "") Or (cmbNatureID.ListIndex = -1) Then
-        CheckValid = False
+        
         
         If GB_LANG = "EN" Then
              MsgBox "Invalid Nature Code", vbOKOnly
@@ -36,22 +36,100 @@ On Error GoTo ErrHandler
         End If
         
         cmbNatureID.SetFocus
+        CheckValid = False
         Exit Function
-    Else
-    If Not IsNull(cmbEtatStart.Value) Or Not (cmbEtatStart.Value = "") Or Not (cmbEtatStart.ListIndex = -1) Then
-        'If Not (cmbEtatStart.Value = "") And Not (cmbEtatStop = "") Then
-            moreSql = " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatStop.Value & "'"
+    
+    Else 'else main if
+    
+        If Not (cmbEtatStart.ListIndex = -1) Then
+            'start ok
+            If Not (cmbEtatEnd.ListIndex = -1) Then
+                'end ok
+                moreSql = " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatEnd.Value & "'"
+            Else
+                'end invalid
+                If GB_LANG = "EN" Then
+                    MsgBox "Invalid end date", vbOKOnly
+                Else
+                    MsgBox "Invalide date de fin", vbOKOnly
+                End If
+            
+                cmbEtatEnd.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
+        Else
+            'start listindex = -1 and not null in text box
+            If Not IsNull(cmbEtatStart.Value) Then
+                If GB_LANG = "EN" Then
+                    MsgBox "Invalid Start date", vbOKOnly
+                Else
+                    MsgBox "Invalide date de début", vbOKOnly
+                End If
+        
+                cmbEtatStart.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
-        If Not IsNull(cmbStart.Value) Or Not (cmbStart.Value = "") Or Not (cmbStart.ListIndex = -1) Then
-        'If Not (cmbStart.Value = "") And Not (cmbStop.Value = "") Then
-            moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbStop.Value & "'"
+        
+        If Not (cmbStart.ListIndex = -1) Then
+            'start ok
+            If Not (cmbEnd.ListIndex = -1) Then
+                'end ok
+                moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbEnd.Value & "'"
+            Else
+                'end invalid list index = -1 and not null
+                'If Not IsNull(cmbEnd.Value) Then
+                
+                    If GB_LANG = "EN" Then
+                        MsgBox "Invalid end date", vbOKOnly
+                    Else
+                        MsgBox "Invalide date de fin", vbOKOnly
+                    End If
+            
+                    cmbEnd.SetFocus
+                    CheckValid = False
+                    Exit Function
+                'End If
+            End If
+        Else
+            'start invalid listindex = -1 and value not null
+            If Not IsNull(cmbStart.Value) Then
+                
+                If GB_LANG = "EN" Then
+                    MsgBox "Invalid Start date", vbOKOnly
+                Else
+                    MsgBox "Invalide date de début", vbOKOnly
+                End If
+        
+                cmbStart.SetFocus
+                CheckValid = False
+                Exit Function
+           End If
         End If
-        If Not IsNull(cmbComment.Value) Or Not (cmbComment.Value = "") Or Not (cmbComment.ListIndex = -1) Then
-        'If Not (cmbComment.Value = "") Then
+        
+        If Not (cmbComment.ListIndex = -1) Then
             moreSql = moreSql & " AND COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
+            
+        Else
+            If Not IsNull(cmbComment.Value) Then
+                
+                If GB_LANG = "EN" Then
+                    MsgBox "Invalid Comment", vbOKOnly
+                Else
+                    MsgBox "Invalide Commentaire", vbOKOnly
+                End If
+        
+                cmbComment.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
+        
         CheckValid = True
-    End If
+        
+    End If 'end main if
   
 Exit_Sub:
     Exit Function
@@ -145,8 +223,8 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
-        Set cmbEtatStop.Recordset = rstEtatdate
-        'cmbEtatStop.Enabled = False
+        Set cmbEtatEnd.Recordset = rstEtatdate
+        cmbEtatEnd.Enabled = False
         
         
         'Origine Date
@@ -159,8 +237,8 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbStart.Recordset = rstDate
-        Set cmbStop.Recordset = rstDate
-        'cmbStop.Enabled = False
+        Set cmbEnd.Recordset = rstDate
+        cmbEnd.Enabled = False
         
         
         'comment
@@ -192,6 +270,45 @@ ErrHandler:
     
 Resume Exit_Sub
 
+End Sub
+
+Private Sub cmbEtatStart_Change()
+On Error GoTo ErrHandler
+
+    If Not (cmbEtatStart.ListIndex = -1) Then
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = True
+    Else
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = False
+    End If
+Exit_Sub:
+    Exit Sub
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+    
+End Sub
+
+Private Sub cmbStart_Change()
+On Error GoTo ErrHandler
+
+    If Not (cmbStart.ListIndex = -1) Then
+        cmbEnd.Value = ""
+        cmbEnd.Enabled = True
+    Else
+        cmbEnd.Value = ""
+        cmbEnd.Enabled = False
+    End If
+Exit_Sub:
+    Exit Sub
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
 End Sub
 
 Private Sub cmdExit_Click()
@@ -262,12 +379,20 @@ On Error GoTo ErrHandler
                 CurrentDb.QueryDefs("qry_DocByNature").Sql = publicSql
                 GB_RPT_TITLE = Nz(cmbNatureID.Value, "-") & ";" & _
                     Nz(cmbEtatStart.Value, "-") & ";" & _
-                    Nz(cmbEtatStop.Value, "-") & ";" & _
+                    Nz(cmbEtatEnd.Value, "-") & ";" & _
                     Nz(cmbStart.Value, "-") & ";" & _
-                    Nz(cmbStop.Value, "-") & ";" & _
+                    Nz(cmbEnd.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
     
-                DoCmd.OpenReport "rpt_DocsByNature", acViewPreview
+                DoCmd.OpenReport "rpt_DocsByNature", acViewReport
+                'DoCmd.Minimize acForm, "frm_DocsByNature"
+                
+                
+                PreviousForm = ""
+                PreviousForm = Me.Name
+                
+                
+                DoCmd.Close acForm, "frm_DocByNature"
     
             Else
 
@@ -282,7 +407,7 @@ On Error GoTo ErrHandler
             End If
   
         'Close/Open Form?
-        'DoCmd.Close acForm, "frm_DocByNature"
+'        DoCmd.Close acForm, "frm_DocByNature"
     End If
 
 

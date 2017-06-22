@@ -111,8 +111,18 @@ End Sub
 Private Sub Report_Close()
 On Error GoTo ErrHandler
 
-DoCmd.OpenForm "frm_DocByCritere", acNormal
-'DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
+
+DoCmd.Close acReport, "rpt_DocByCritere", acSaveNo
+'DoCmd.OpenForm "frm_DocByCritere", acNormal
+
+'Dim frm As Form
+'
+'    For Each frm In Application.Forms
+'        If frm.Name = PreviousForm Then
+'            frm.Visible = True
+'            Exit For
+'        End If
+'    Next frm
 
 Exit_Sub:
     Exit Sub

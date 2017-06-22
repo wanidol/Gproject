@@ -241,7 +241,7 @@ Private Sub cmdFind_Click()
     Dim critId As String
     Dim docNum As String
     Dim NatureID As String
-    Dim etatId As String
+    Dim EtatID As String
     Dim i As Integer
 
 

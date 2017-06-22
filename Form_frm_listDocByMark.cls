@@ -212,7 +212,7 @@ On Error GoTo ErrHandler
     Dim MarkId As String
     Dim docNum As String
     Dim NatureID As String
-    Dim etatId As String
+    Dim EtatID As String
     Dim i As Integer
 
     If CheckValid() Then

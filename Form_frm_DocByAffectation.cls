@@ -71,7 +71,7 @@ Dim coll As Collection
         GB_RPT_TITLE = Nz(cmbAffectID.Value) & ";" & _
                             Nz(cmbNatureID.Value, "-") & ";" & _
                             Nz(cmbEtatStart.Value, "-") & ";" & _
-                            Nz(cmbEtatStop.Value, "-") & ";" & _
+                            Nz(cmbEtatEnd.Value, "-") & ";" & _
                             Nz(cmbClientLinked.Value, "-") & ";" & _
                             Nz(cmbComment.Value, "-") & ";"
 '
@@ -89,7 +89,6 @@ On Error GoTo ErrHandler
     moreSql = ""
     
     If IsNull(cmbAffectID.Value) Or (cmbAffectID.Value = "") Or (cmbAffectID.ListIndex = -1) Then
-        CheckValid = False
         
         If GB_LANG = "EN" Then
             MsgBox "Invalid Affectation Code", vbOKOnly
@@ -97,26 +96,92 @@ On Error GoTo ErrHandler
             MsgBox "Invalide Affectation", vbOKOnly
         End If
         
-        'MsgBox "Invalid Affectation Code", vbOKOnly
+        CheckValid = False
+        cmbAffectID.SetFocus
+        
         Exit Function
-    Else
-        If Not IsNull(cmbNatureID.Value) Or Not (cmbNatureID.Value = "") Or Not (cmbNatureID.ListIndex = -1) Then
+        
+    Else 'else main if
+        If Not (cmbNatureID.ListIndex = -1) Then
             moreSql = moreSql & " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
-        End If
-        If Not IsNull(cmbEtatStart.Value) Or Not (cmbEtatStart.Value = "") Or Not (cmbEtatStart.ListIndex = -1) Then
-            moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatStop.Value & "'"
+        Else
+            If Not IsNull(cmbNatureID.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide code de Nature", vbOKOnly
+                Else
+                    MsgBox "Invalid Nature code", vbOKOnly
+                End If
+                cmbNatureID.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
-        If Not IsNull(cmbClientLinked.Value) Or Not (cmbClientLinked.Value = "") Or Not (cmbClientLinked.ListIndex = -1) Then
+        If Not (cmbEtatStart.ListIndex = -1) Then
+        
+            If Not (cmbEtatEnd.ListIndex = -1) Then
+                moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatEnd.Value & "'"
+            Else
+'                If Not IsNull(cmbEtatEnd.Value) Then
+                    If GB_LANG = "Fr" Then
+                        MsgBox "Invalide date de fin", vbOKOnly
+                    Else
+                        MsgBox "Invalid end date", vbOKOnly
+                    End If
+                    cmbEtatEnd.SetFocus
+                    CheckValid = False
+                    Exit Function
+'               End If
+            End If
+        Else
+            If Not IsNull(cmbEtatStart.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide date de début", vbOKOnly
+                Else
+                    MsgBox "Invalid start date", vbOKOnly
+                End If
+                
+                cmbEtatStart.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
+        
+        End If
+        
+        If Not (cmbClientLinked.ListIndex = -1) Then
              moreSql = moreSql & " AND CONTRACTUEL = '" & cmbClientLinked.Value & "'"
+        Else
+            If Not IsNull(cmbClientLinked.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide lié client", vbOKOnly
+                Else
+                    MsgBox "Invalid client linked", vbOKOnly
+                End If
+                
+                cmbClientLinked.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
-        If Not IsNull(cmbComment.Value) Or Not (cmbComment.Value = "") Or Not (cmbComment.ListIndex = -1) Then
+        If Not (cmbComment.ListIndex = -1) Then
             moreSql = moreSql & " AND COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
+        Else
+            If Not IsNull(cmbComment.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide Commentaire", vbOKOnly
+                Else
+                    MsgBox "Invalid Comment Data", vbOKOnly
+                End If
+                
+                cmbComment.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
         CheckValid = True
-    End If
+    End If ' end main if
   
 Exit_Sub:
     Exit Function
@@ -225,8 +290,9 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
-        Set cmbEtatStop.Recordset = rstEtatdate
-        'cmbEtatStop.Enabled = False
+        Set cmbEtatEnd.Recordset = rstEtatdate
+        
+        cmbEtatEnd.Enabled = False
         
         'Linked to a client
         With rstClient
@@ -269,6 +335,29 @@ ErrHandler:
 Resume Exit_Sub
 
 End Sub
+
+Private Sub cmbEtatStart_Change()
+On Error GoTo ErrHandler
+
+    If Not (cmbEtatStart.ListIndex = -1) Then
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = True
+    Else
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = False
+    End If
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+
+End Sub
+
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
@@ -335,11 +424,16 @@ On Error GoTo ErrHandler
                 GB_RPT_TITLE = Nz(cmbAffectID.Value) & ";" & _
                     Nz(cmbNatureID.Value, "-") & ";" & _
                     Nz(cmbEtatStart.Value, "-") & ";" & _
-                    Nz(cmbEtatStop.Value, "-") & ";" & _
+                    Nz(cmbEtatEnd.Value, "-") & ";" & _
                     Nz(cmbClientLinked.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
         
-                DoCmd.OpenReport "rpt_DocsByAffectation", acViewPreview
+                DoCmd.OpenReport "rpt_DocsByAffectation", acViewReport
+                'DoCmd.Minimize acForm, "frm_DocsByAffectation"
+                PreviousForm = ""
+                PreviousForm = Me.Name
+                
+                DoCmd.Close acForm, "frm_DocByAffectation"
             Else
                 'DoCmd.Close acReport, "rpt_DocsByAffectation", acSaveYes
                 
@@ -368,7 +462,6 @@ ErrHandler:
 Resume Exit_Sub
 
 End Sub
-
 
 
 Private Sub Form_Load()

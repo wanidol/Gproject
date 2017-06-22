@@ -31,7 +31,7 @@ On Error GoTo ErrHandler
     moreSql = ""
         
     If IsNull(cmbMarkID.Value) Or (cmbMarkID.Value = "") Or (cmbMarkID.ListIndex = -1) Then
-        CheckValid = False
+        
         
         If GB_LANG = "EN" Then
             MsgBox "Invalid Mark Code", vbOKOnly
@@ -40,34 +40,137 @@ On Error GoTo ErrHandler
         End If
         
         cmbMarkID.SetFocus
+        CheckValid = False
         
         Exit Function
-    Else
-        If Not IsNull(cmbNatureID.Value) Or Not (cmbNatureID.Value = "") Or Not (cmbNatureID.ListIndex = -1) Then
+        
+    Else 'else main if
+    
+        If Not (cmbNatureID.ListIndex = -1) Then
             'moreSql = " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
              NatureID = cmbNatureID.Value
+        
+        Else 'case invalid data
+            If Not IsNull(cmbNatureID.Value) Then
+                If GB_LANG = "Fr" Then
+                   MsgBox "Invalide Nature", vbOKOnly
+                Else
+                    MsgBox "Invalid Nature Code", vbOKOnly
+                End If
+                
+                cmbNatureID.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
        
         End If
         
-        If Not IsNull(cmbEtatStart.Value) Or Not (cmbEtatStart.Value = "") Or Not (cmbEtatStart.ListIndex = -1) Then
-            moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatStop.Value & "'"
+        If Not (cmbEtatStart.ListIndex = -1) Then
+            'moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatEnd.Value & "'"
+            'start ok
+                If Not (cmbEtatEnd.ListIndex = -1) Then
+                 'end ok
+                    moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatEnd.Value & "'"
+                    
+                Else 'valid data listindex = -1 and not null end not ok
+                    If GB_LANG = "Fr" Then
+                        MsgBox "Invalide date de fin", vbOKOnly
+                    Else
+                        MsgBox "Invalid end date", vbOKOnly
+                    End If
+                    
+                    cmbEtatEnd.SetFocus
+                    CheckValid = False
+                    Exit Function
+                 
+                End If
+        Else 'case invalid data
+            If Not IsNull(cmbEtatStart.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide date de début", vbOKOnly
+                Else
+                    MsgBox "Invalid start date", vbOKOnly
+                End If
+                
+                cmbEtatStart.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
-        If Not IsNull(cmbStart.Value) Or Not (cmbStart.Value = "") Or Not (cmbStart.ListIndex = -1) Then
-            moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbStop.Value & "'"
-        End If
         
-        If Not IsNull(cmbComment.Value) Or Not (cmbComment.Value = "") Or Not (cmbComment.ListIndex = -1) Then
+        
+        If Not (cmbStart.ListIndex = -1) Then
+            
+            'Start ok
+            If Not (cmbEnd.ListIndex = -1) Then
+            'End ok
+              moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbEnd.Value & "'"
+            Else
+            'end not Ok
+                If GB_LANG = "Fr" Then
+                   MsgBox "Invalide Date", vbOKOnly
+                Else
+                    MsgBox "Invalid Format Date", vbOKOnly
+                End If
+                
+                cmbEnd.SetFocus
+                CheckValid = False
+                Exit Function
+           End If
+            
+        Else 'case invalid data listindex = -1
+            If Not IsNull(cmbStart.Value) Then
+                
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide Date", vbOKOnly
+                Else
+                    MsgBox "Invalid Format Date", vbOKOnly
+                End If
+                
+                cmbStart.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
+       
+        End If
+        'And DATE_ETAT_DOCUMENT BETWEEN '01/01/91' AND '01/02/00' And DATE_ORIGINE_DOCUMENT BETWEEN '01/02/00' AND '01/02/88' AND COMMENTAIRES_SUIVI = 'ESSAIS SOUDAGE'
+        
+        
+        If Not (cmbComment.ListIndex = -1) Then
             moreSql = moreSql & " AND COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
+        Else 'case invalid data listindex = -1
+            If Not IsNull(cmbComment.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide Commentaire", vbOKOnly
+                Else
+                    MsgBox "Invalid Comment Data", vbOKOnly
+                End If
+                cmbComment.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
-        If Not IsNull(cmbCritere.Value) Or Not (cmbCritere.Value = "") Or Not (cmbCritere.ListIndex = -1) Then
+        If Not (cmbCritere.ListIndex = -1) Then
             'moreSql = moreSql & " And CRITERE_MOT_CLE = '" & cmbCritere.Value & "'"
              CritereId = cmbCritere.Value
+             
+        Else 'case invalid data listindex = -1
+            If Not IsNull(cmbCritere.Value) Then
+                If GB_LANG = "Fr" Then
+                    MsgBox "Invalide Critère", vbOKOnly
+                Else
+                    MsgBox "Invalid Criteria Code", vbOKOnly
+                End If
+                cmbCritere.SetFocus
+                CheckValid = False
+                Exit Function
+            End If
         End If
         
         CheckValid = True
-    End If
+    End If 'end main if
   
 Exit_Sub:
     Exit Function
@@ -164,8 +267,9 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
-        Set cmbEtatStop.Recordset = rstEtatdate
-        'cmbEtatStop.Enabled = False
+        Set cmbEtatEnd.Recordset = rstEtatdate
+        
+        cmbEtatEnd.Enabled = False
         
         
         'Origine Date
@@ -178,8 +282,8 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbStart.Recordset = rstDate
-        Set cmbStop.Recordset = rstDate
-        'cmbStop.Enabled = False
+        Set cmbEnd.Recordset = rstDate
+        cmbEnd.Enabled = False
         
         
         'comment
@@ -225,6 +329,45 @@ Resume Exit_Sub
 
 End Sub
 
+Private Sub cmbEtatStart_Change()
+On Error GoTo ErrHandler
+
+    If Not (cmbEtatStart.ListIndex = -1) Then
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = True
+    Else
+        cmbEtatEnd.Value = ""
+        cmbEtatEnd.Enabled = False
+    End If
+Exit_Sub:
+    Exit Sub
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
+Private Sub cmbStart_Change()
+On Error GoTo ErrHandler
+
+    If Not (cmbStart.ListIndex = -1) Then
+        cmbEnd.Value = ""
+        cmbEnd.Enabled = True
+    Else
+        cmbEnd.Value = ""
+        cmbEnd.Enabled = False
+    End If
+Exit_Sub:
+    Exit Sub
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+    
+End Sub
+
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
@@ -247,12 +390,15 @@ Dim MarkId As String
 
     publicSql = ""
     MarkId = cmbMarkID.Value
+   'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION,LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='001153' And DATE_ETAT_DOCUMENT BETWEEN '01/01/91' AND '01/02/00' And DATE_ORIGINE_DOCUMENT BETWEEN '01/02/00' AND '01/02/88' AND COMMENTAIRES_SUIVI = 'ESSAIS SOUDAGE' ORDER BY NUMERO_DOCUMENT
+   
    
     If (NatureID = "") And (CritereId = "") Then
                     
         publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
             "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE " & _
-            "FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "' ORDER BY NUMERO_DOCUMENT"
+            "FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
+            " ORDER BY NUMERO_DOCUMENT"
     Else
         'case inner join both
         If (NatureID <> "") And (CritereId <> "") Then
@@ -330,13 +476,19 @@ On Error GoTo ErrHandler
                 GB_RPT_TITLE = Nz(cmbMarkID.Value, "-") & ";" & _
                     Nz(cmbNatureID.Value, "-") & ";" & _
                     Nz(cmbEtatStart.Value, "-") & ";" & _
-                    Nz(cmbEtatStop.Value, "-") & ";" & _
+                    Nz(cmbEtatEnd.Value, "-") & ";" & _
                     Nz(cmbStart.Value, "-") & ";" & _
-                    Nz(cmbStop.Value, "-") & ";" & _
+                    Nz(cmbEnd.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";" & _
                     Nz(cmbCritere.Value, "-") & ";"
                
-                DoCmd.OpenReport "rpt_DocsByMark", acViewPreview
+                DoCmd.OpenReport "rpt_DocsByMark", acViewReport
+                'DoCmd.Minimize acForm, "frm_DocsByMark"
+                
+                PreviousForm = ""
+                PreviousForm = Me.Name
+                
+                DoCmd.Close acForm, "frm_DocByMark"
             
             Else
                 If GB_LANG = "EN" Then
