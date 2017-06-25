@@ -11,9 +11,17 @@ Option Compare Database
 Option Explicit
 
 Private Sub Report_Load()
-
+On Error GoTo ErrHandler
     DoCmd.ShowToolbar "Ribbon", acToolbarYes
 
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
 End Sub
 
 Private Sub Report_NoData(Cancel As Integer)
