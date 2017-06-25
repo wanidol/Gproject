@@ -9,6 +9,12 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Compare Database
 Option Explicit
+
+
+Private Sub Report_Load()
+DoCmd.ShowToolbar "Ribbon", acToolbarYes
+End Sub
+
 Private Sub Report_NoData(Cancel As Integer)
 On Error GoTo ErrHandler
 
@@ -29,17 +35,9 @@ Private Sub Report_Close()
 On Error GoTo ErrHandler
 
 
-DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
-'DoCmd.OpenForm "frm_DocByMark", acNormal
-
-'Dim frm As Form
-'
-'    For Each frm In Application.Forms
-'        If frm.Name = PreviousForm Then
-'            frm.Visible = True
-'            Exit For
-'        End If
-'    Next frm
+'DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
+DoCmd.ShowToolbar "Ribbon", acToolbarNo
+DoCmd.OpenForm "frm_DocByMark", acNormal
 
 Exit_Sub:
     Exit Sub
@@ -129,6 +127,5 @@ Resume Exit_Sub
 
     
 End Sub
-
 
 

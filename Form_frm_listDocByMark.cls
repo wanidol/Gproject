@@ -7,7 +7,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -32,20 +31,20 @@ On Error GoTo ErrHandler
     
     
     If IsNull(cmbMarkID.Value) Or (cmbMarkID.Value = "") Or (cmbMarkID.ListIndex = -1) Then
-        CheckValid = False
-        
+                
         If GB_LANG = "FR" Then
             MsgBox "N° de Marguage Invalide", vbOKOnly
         Else
             MsgBox "Invalid Mark Code", vbOKOnly
         End If
         
+        CheckValid = False
         cmbMarkID.SetFocus
         Exit Function
     Else
         
-        If IsNull(cmbNatureID.Value) Or (cmbNatureID.Value = "") Or (cmbNatureID.ListIndex = -1) Then
-            If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Or (cmbEtatID.ListIndex = -1) Then
+        If (cmbNatureID.ListIndex = -1) Then
+            If (cmbEtatID.ListIndex = -1) Then
             'case 3. no nature no etat
                 CheckValid = False
                
@@ -57,22 +56,47 @@ On Error GoTo ErrHandler
                 
                 If (cmbNatureID.ListIndex = -1) Then
                     cmbNatureID.SetFocus
-                Else
-                    cmbEtatID.SetFocus
+'                Else
+'                    cmbEtatID.SetFocus
                 End If
                 
                 Exit Function
             Else
                 'case 1.1 nature no etat ok
-                moreSql = " And CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
-'                Debug.Print moreSql
+                If Not IsNull(cmbNatureID.Value) Then
+                    'check invalid input data
+                    
+                    If GB_LANG = "FR" Then
+                        MsgBox "Invalide Nature", vbOKOnly
+                    Else
+                        MsgBox "invalid Nature Code", vbOKOnly
+                    End If
+                    CheckValid = False
+                    cmbNatureID.SetFocus
+                    Exit Function
+                Else
+                    'case only etat
+                    moreSql = " And CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
+                    
+                End If
                 CheckValid = True
             End If
         Else
             'case 1.2 nature ok etat no
-            If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Or (cmbEtatID.ListIndex = -1) Then
-                moreSql = " And CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'"
-                'Debug.Print moreSql
+            If (cmbEtatID.ListIndex = -1) Then
+                If Not IsNull(cmbEtatID.Value) Then
+                    If GB_LANG = "FR" Then
+                        MsgBox "Invalide Etat", vbOKOnly
+                    Else
+                        MsgBox "invalid Status Code", vbOKOnly
+                    End If
+                    CheckValid = False
+                    cmbEtatID.SetFocus
+                    Exit Function
+                
+                Else
+                    moreSql = " And CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'"
+                End If
             Else
             'case 2. nature ok etat ok
                 moreSql = " And CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'" & _
@@ -95,8 +119,8 @@ End Function
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
 
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
 
@@ -146,29 +170,29 @@ On Error GoTo ErrHandler
     If rstEtat.State = adStateOpen Then rstEtat.Close
     
     With rstMark
-        Sql = "SELECT CODE_REPERE_MARQUAGE FROM REPERES_MARQUAGE ORDER BY CODE_REPERE_MARQUAGE "
+        sql = "SELECT CODE_REPERE_MARQUAGE FROM REPERES_MARQUAGE ORDER BY CODE_REPERE_MARQUAGE "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     Set cmbMarkID.Recordset = rstMark
         
     With rstNature
-        Sql = "SELECT CODE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+        sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     Set cmbNatureID.Recordset = rstNature
     
     With rstEtat
-        Sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
+        sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     Set cmbEtatID.Recordset = rstEtat
     
@@ -208,7 +232,7 @@ End Sub
 
 Private Sub cmdFind_Click()
 On Error GoTo ErrHandler
-    Dim Sql As String
+    Dim sql As String
     Dim MarkId As String
     Dim docNum As String
     Dim NatureID As String
@@ -226,14 +250,14 @@ On Error GoTo ErrHandler
             'only nature=>SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'pqp'
             'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' ORDER BY NUMERO_DOCUMENT
             'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' And CODE_ETAT_DOCUMENT = 'FM' ORDER BY NUMERO_DOCUMENT
-             Sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
+             sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
                     "CODE_ETAT_DOCUMENT,INDICE_MODIFICATION," & _
                     "DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
                     "FROM DOCUMENTS Where code_repere_marquage ='" & MarkId & "'" & moreSql & " ORDER BY NUMERO_DOCUMENT"
                 .CursorType = adOpenDynamic
                 .CursorLocation = adUseClient
                 .LockType = adLockOptimistic
-                .Open Sql, cn, , , adCmdText
+                .Open sql, cn, , , adCmdText
             End With
             
             'Record Found

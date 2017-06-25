@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -142,8 +143,8 @@ End Function
 
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
     Dim i As Integer
@@ -193,11 +194,11 @@ On Error GoTo ErrHandler
         
         'NatureID
         With rstNature
-            Sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+            sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         Set cmbNatureID.Recordset = rstNature
         
@@ -215,11 +216,11 @@ On Error GoTo ErrHandler
 '        Loop
        'Etat Date
         With rstEtatdate
-            Sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
@@ -229,11 +230,11 @@ On Error GoTo ErrHandler
         
         'Origine Date
         With rstDate
-            Sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbStart.Recordset = rstDate
@@ -244,11 +245,11 @@ On Error GoTo ErrHandler
         'comment
         
          With rstComment
-            Sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
+            sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbComment.Recordset = rstComment
@@ -376,7 +377,7 @@ On Error GoTo ErrHandler
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
             
-                CurrentDb.QueryDefs("qry_DocByNature").Sql = publicSql
+                CurrentDb.QueryDefs("qry_DocByNature").sql = publicSql
                 GB_RPT_TITLE = Nz(cmbNatureID.Value, "-") & ";" & _
                     Nz(cmbEtatStart.Value, "-") & ";" & _
                     Nz(cmbEtatEnd.Value, "-") & ";" & _
@@ -384,7 +385,7 @@ On Error GoTo ErrHandler
                     Nz(cmbEnd.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
     
-                DoCmd.OpenReport "rpt_DocsByNature", acViewReport
+                DoCmd.OpenReport "rpt_DocsByNature", acViewPreview
                 'DoCmd.Minimize acForm, "frm_DocsByNature"
                 
                 
@@ -439,3 +440,5 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+
+

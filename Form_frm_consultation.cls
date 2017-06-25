@@ -88,7 +88,7 @@ On Error GoTo ErrHandler
         lblMark.Caption = "List of documents related to a marking piece "
         lblCritere.Caption = "List of documents related to an access criterion"
     Else 'FR
-        lblHeader.Caption = "Consultation - Document Search"
+        lblHeader.Caption = "Consultation - Recherches"
         lblDocument.Caption = "Consultation Suivi Document"
         lblMark.Caption = "Liste des documents liés à une pièce de marquage "
         lblCritere.Caption = "Liste des documents liés à un critère d'accès"
@@ -104,3 +104,4 @@ ErrHandler:
 Resume Exit_Sub
 
 End Sub
+

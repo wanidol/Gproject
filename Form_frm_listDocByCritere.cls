@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -55,10 +56,11 @@ On Error GoTo ErrHandler
             cmbCritereId.SetFocus
             Exit Function
         Else
-            If IsNull(cmbNatureID.Value) Or (cmbNatureID.Value = "") Or (cmbNatureID.ListIndex = -1) Then
-                If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Or (cmbEtatID.ListIndex = -1) Then
+            If (cmbNatureID.ListIndex = -1) Then
+                If (cmbEtatID.ListIndex = -1) Then
                 'case 3. no nature no etat
                     CheckValid = False
+                   
                     If GB_LANG = "FR" Then
                         MsgBox "Saisissez Le Code De La Nature Et/Ou Le Code De L'Etat", vbOKOnly
                     Else
@@ -67,27 +69,52 @@ On Error GoTo ErrHandler
                     
                     If (cmbNatureID.ListIndex = -1) Then
                         cmbNatureID.SetFocus
-                    Else
-                        cmbEtatID.SetFocus
+    '                Else
+    '                    cmbEtatID.SetFocus
                     End If
-                    
+                
                     Exit Function
                 Else
                     'case 1.1 nature no etat ok
-                    moreSql = " d.CODE_ETAT_DOCUMENT = '" & cmbEtatID.Value & "'"
-'                    Debug.Print moreSql
-                    CheckValid = True
+                    If Not IsNull(cmbNatureID.Value) Then
+                        'check invalid input data
+                        
+                        If GB_LANG = "FR" Then
+                            MsgBox "Invalide Nature", vbOKOnly
+                        Else
+                            MsgBox "invalid Nature Code", vbOKOnly
+                        End If
+                        CheckValid = False
+                        cmbNatureID.SetFocus
+                        Exit Function
+                    Else
+                        'case only etat
+                        moreSql = " CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
+                        
+                    End If
+                
                 End If
             Else
                 'case 1.2 nature ok etat no
-                If IsNull(cmbEtatID.Value) Or (cmbEtatID.Value = "") Then
-                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
-'                    Debug.Print moreSql
+                If (cmbEtatID.ListIndex = -1) Then
+                    If Not IsNull(cmbEtatID.Value) Then
+                        If GB_LANG = "FR" Then
+                            MsgBox "Invalide Etat", vbOKOnly
+                        Else
+                            MsgBox "invalid Status Code", vbOKOnly
+                        End If
+                        CheckValid = False
+                        cmbEtatID.SetFocus
+                        Exit Function
+                    
+                    Else
+                        moreSql = " CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'"
+                    End If
                 Else
                 'case 2. nature ok etat ok
-                    moreSql = " d.CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'" & _
-                                " And d.CODE_ETAT_DOCUMENT = '" & cmbEtatID.Value & "'"
-'                    Debug.Print moreSql
+                    moreSql = " CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'" & _
+                            " And CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
+                    'Debug.Print moreSql
                 End If
                 CheckValid = True
             End If
@@ -107,8 +134,8 @@ Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
 
 
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
 
@@ -158,38 +185,38 @@ If cn.State = adStateOpen Then cn.Close
     If rstType.State = adStateOpen Then rstType.Close
     
     With rstType
-        Sql = "SELECT DISTINCT  CODE_TYPE_CRITERE FROM liens "
+        sql = "SELECT DISTINCT  CODE_TYPE_CRITERE FROM liens "
     
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     
     With rstCritere
     
-        Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
+        sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     
      With rstNature
-        Sql = "SELECT CODE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+        sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     
     
     With rstEtat
-        Sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
+        sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
         .CursorType = adOpenDynamic
         .CursorLocation = adUseClient
         .LockType = adLockOptimistic
-        .Open Sql, cn, , , adCmdText
+        .Open sql, cn, , , adCmdText
     End With
     
     Set cmbEtatID.Recordset = rstEtat
@@ -236,8 +263,8 @@ End Sub
 
 Private Sub cmdFind_Click()
     On Error GoTo ErrHandler
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
     Dim NatureID As String
@@ -246,7 +273,7 @@ Private Sub cmdFind_Click()
 
 
     If CheckValid() Then
-        typeId = cmbTypeID.Value
+        typeID = cmbTypeID.Value
         critId = cmbCritereId.Value
      
         If cn.State = adStateOpen Then cn.Close
@@ -254,17 +281,17 @@ Private Sub cmdFind_Click()
             If rst.State = adStateOpen Then rst.Close
             With rst
             
-            Sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
+            sql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
                     "d.CODE_ETAT_DOCUMENT,d.INDICE_MODIFICATION," & _
                     "d.DATE_ETAT_DOCUMENT,d.LIBELLE_DOCUMENT,d.DATE_ORIGINE_DOCUMENT " & _
-                    "FROM DOCUMENTS d Inner join (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeId & "' And CRITERE_MOT_CLE ='" & critId & "') doc_num " & _
+                    "FROM DOCUMENTS d Inner join (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeID & "' And CRITERE_MOT_CLE ='" & critId & "') doc_num " & _
                     "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
                     "WHERE " & moreSql & " ORDER BY d.NUMERO_DOCUMENT"
 
                 .CursorType = adOpenDynamic
                 .CursorLocation = adUseClient
                 .LockType = adLockOptimistic
-                .Open Sql, cn, , , adCmdText
+                .Open sql, cn, , , adCmdText
             End With
            
             'Record Found
@@ -347,3 +374,5 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+
+

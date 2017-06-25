@@ -12,7 +12,7 @@ Option Explicit
 Dim Db As Database
 Dim rs As New ADODB.Recordset
 Dim cn As New ADODB.Connection
-Dim Sql As String
+Dim sql As String
 Dim S1 As String
 
 Private Sub UserForm_Initialize()
@@ -138,7 +138,7 @@ Private Sub Form_Load()
 On Error GoTo ErrHandler
     
     'DoCmd.Maximize
-    
+    DoCmd.ShowToolbar "Ribbon", acToolbarNo
  
     If GB_LANG = "" Then
         Call InitGlobal
@@ -155,3 +155,4 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+

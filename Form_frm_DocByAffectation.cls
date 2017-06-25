@@ -7,7 +7,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -103,7 +102,7 @@ On Error GoTo ErrHandler
         
     Else 'else main if
         If Not (cmbNatureID.ListIndex = -1) Then
-            moreSql = moreSql & " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
+            moreSql = moreSql & " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Column(0) & "'"
         Else
             If Not IsNull(cmbNatureID.Value) Then
                 If GB_LANG = "Fr" Then
@@ -194,8 +193,8 @@ End Function
 
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
     Dim i As Integer
@@ -248,22 +247,22 @@ On Error GoTo ErrHandler
         
         'Affectation
         With rstAffect
-             Sql = "SELECT CODE_AFFECTATION FROM AFFECTATION ORDER BY CODE_AFFECTATION  "
+             sql = "SELECT CODE_AFFECTATION,LIBELLE_AFFECTATION FROM AFFECTATION ORDER BY CODE_AFFECTATION  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbAffectID.Recordset = rstAffect
         
         'NatureID
         With rstNature
-            Sql = "SELECT CODE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+            sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
 '        i = 0
@@ -282,11 +281,11 @@ On Error GoTo ErrHandler
         
        'Etat Date
         With rstEtatdate
-            Sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
@@ -296,11 +295,11 @@ On Error GoTo ErrHandler
         
         'Linked to a client
         With rstClient
-         Sql = "SELECT DISTINCT CONTRACTUEL FROM DOCUMENTS"
+         sql = "SELECT DISTINCT CONTRACTUEL FROM DOCUMENTS"
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbClientLinked.Recordset = rstClient
@@ -308,11 +307,11 @@ On Error GoTo ErrHandler
         'comment
         
          With rstComment
-            Sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
+            sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbComment.Recordset = rstComment
@@ -321,6 +320,10 @@ On Error GoTo ErrHandler
         'set focus on Nature Code default first listindex
         With Me.cmbAffectID
             .Value = .ItemData(.ListIndex + 1)
+            '.Selected(1) = True
+             '   .Value = .ItemData(0)
+            '.Value = .ListIndex(0)
+'            .ListIndex = 1
         End With
         cmbAffectID.SetFocus
             
@@ -380,8 +383,9 @@ On Error GoTo ErrHandler
     
     publicSql = ""
    
+'    AffactID = cmbAffectID.Column(0)
     AffactID = cmbAffectID.Value
-    
+ 
     publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
                             "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_AFFECTATION " & _
                             "FROM DOCUMENTS WHERE CODE_AFFECTATION ='" & AffactID & "'" & moreSql & _
@@ -420,7 +424,7 @@ On Error GoTo ErrHandler
 
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
-                CurrentDb.QueryDefs("qry_DocByAffectation").Sql = publicSql
+                CurrentDb.QueryDefs("qry_DocByAffectation").sql = publicSql
                 GB_RPT_TITLE = Nz(cmbAffectID.Value) & ";" & _
                     Nz(cmbNatureID.Value, "-") & ";" & _
                     Nz(cmbEtatStart.Value, "-") & ";" & _
@@ -428,7 +432,7 @@ On Error GoTo ErrHandler
                     Nz(cmbClientLinked.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
         
-                DoCmd.OpenReport "rpt_DocsByAffectation", acViewReport
+                DoCmd.OpenReport "rpt_DocsByAffectation", acViewPreview
                 'DoCmd.Minimize acForm, "frm_DocsByAffectation"
                 PreviousForm = ""
                 PreviousForm = Me.Name
@@ -462,6 +466,8 @@ ErrHandler:
 Resume Exit_Sub
 
 End Sub
+
+
 
 
 Private Sub Form_Load()

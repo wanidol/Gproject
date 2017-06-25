@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -22,7 +23,7 @@ Dim Status As String
 
 Dim moreSql As String
 Dim NatureID As String
-Dim CritereId As String
+Dim critereID As String
 Dim publicSql As String
 
 Function CheckValid() As Boolean
@@ -108,11 +109,11 @@ On Error GoTo ErrHandler
               moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbEnd.Value & "'"
             Else
             'end not Ok
-                If GB_LANG = "Fr" Then
-                   MsgBox "Invalide Date", vbOKOnly
-                Else
-                    MsgBox "Invalid Format Date", vbOKOnly
-                End If
+                 If GB_LANG = "Fr" Then
+                        MsgBox "Invalide date de fin", vbOKOnly
+                    Else
+                        MsgBox "Invalid end date", vbOKOnly
+                    End If
                 
                 cmbEnd.SetFocus
                 CheckValid = False
@@ -123,9 +124,9 @@ On Error GoTo ErrHandler
             If Not IsNull(cmbStart.Value) Then
                 
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide Date", vbOKOnly
+                    MsgBox "Invalide date de début", vbOKOnly
                 Else
-                    MsgBox "Invalid Format Date", vbOKOnly
+                    MsgBox "Invalid start date", vbOKOnly
                 End If
                 
                 cmbStart.SetFocus
@@ -154,7 +155,7 @@ On Error GoTo ErrHandler
         
         If Not (cmbCritere.ListIndex = -1) Then
             'moreSql = moreSql & " And CRITERE_MOT_CLE = '" & cmbCritere.Value & "'"
-             CritereId = cmbCritere.Value
+             critereID = cmbCritere.Value
              
         Else 'case invalid data listindex = -1
             If Not IsNull(cmbCritere.Value) Then
@@ -183,8 +184,8 @@ End Function
 
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
 
@@ -192,7 +193,7 @@ On Error GoTo ErrHandler
     GB_RPT_TITLE = ""
     moreSql = ""
     NatureID = ""
-    CritereId = ""
+    critereID = ""
     
     'Clear all Controls
     Call ClearAll(Me)
@@ -239,31 +240,31 @@ On Error GoTo ErrHandler
         
         'Mark
         With rstMark
-            Sql = "SELECT CODE_REPERE_MARQUAGE FROM REPERES_MARQUAGE order by CODE_REPERE_MARQUAGE  "
+            sql = "SELECT CODE_REPERE_MARQUAGE FROM REPERES_MARQUAGE order by CODE_REPERE_MARQUAGE  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         Set cmbMarkID.Recordset = rstMark
         
         'Nature
         With rstNature
-            Sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+            sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         Set cmbNatureID.Recordset = rstNature
         
         'Etat Date
         With rstEtatdate
-            Sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbEtatStart.Recordset = rstEtatdate
@@ -274,11 +275,11 @@ On Error GoTo ErrHandler
         
         'Origine Date
         With rstDate
-            Sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbStart.Recordset = rstDate
@@ -289,11 +290,11 @@ On Error GoTo ErrHandler
         'comment
         
          With rstComment
-            Sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
+            sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbComment.Recordset = rstComment
@@ -301,11 +302,11 @@ On Error GoTo ErrHandler
         
        'critere
        With rstCritere
-        Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
+        sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbCritere.Recordset = rstCritere
@@ -393,7 +394,7 @@ Dim MarkId As String
    'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION,LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='001153' And DATE_ETAT_DOCUMENT BETWEEN '01/01/91' AND '01/02/00' And DATE_ORIGINE_DOCUMENT BETWEEN '01/02/00' AND '01/02/88' AND COMMENTAIRES_SUIVI = 'ESSAIS SOUDAGE' ORDER BY NUMERO_DOCUMENT
    
    
-    If (NatureID = "") And (CritereId = "") Then
+    If (NatureID = "") And (critereID = "") Then
                     
         publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
             "LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE " & _
@@ -401,26 +402,26 @@ Dim MarkId As String
             " ORDER BY NUMERO_DOCUMENT"
     Else
         'case inner join both
-        If (NatureID <> "") And (CritereId <> "") Then
+        If (NatureID <> "") And (critereID <> "") Then
             publicSql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
                     "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
                     "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT,d.CODE_REPERE_MARQUAGE " & _
                     "FROM DOCUMENTS d " & _
                     "INNER JOIN (Select NUMERO_DOCUMENT from Liens " & _
                     "WHERE CODE_NATURE_DOCUMENT='" & NatureID & "'" & _
-                    "And CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
+                    "And CRITERE_MOT_CLE ='" & critereID & "') doc_num " & _
                     "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
                     "WHERE d.CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
                     " ORDER BY d.NUMERO_DOCUMENT"
         Else
         'case inner join by critere
-            If (NatureID = "") And (CritereId <> "") Then
+            If (NatureID = "") And (critereID <> "") Then
                 publicSql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
                         "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
                         "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT,d.CODE_REPERE_MARQUAGE " & _
                         "FROM DOCUMENTS d " & _
                         "INNER JOIN (Select NUMERO_DOCUMENT from Liens " & _
-                        "WHERE CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
+                        "WHERE CRITERE_MOT_CLE ='" & critereID & "') doc_num " & _
                         "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT " & _
                         "WHERE d.CODE_REPERE_MARQUAGE ='" & MarkId & "'" & moreSql & _
                         " ORDER BY d.NUMERO_DOCUMENT"
@@ -471,7 +472,7 @@ On Error GoTo ErrHandler
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
             
-                CurrentDb.QueryDefs("qry_DocByMark").Sql = publicSql
+                CurrentDb.QueryDefs("qry_DocByMark").sql = publicSql
                 
                 GB_RPT_TITLE = Nz(cmbMarkID.Value, "-") & ";" & _
                     Nz(cmbNatureID.Value, "-") & ";" & _
@@ -482,7 +483,7 @@ On Error GoTo ErrHandler
                     Nz(cmbComment.Value, "-") & ";" & _
                     Nz(cmbCritere.Value, "-") & ";"
                
-                DoCmd.OpenReport "rpt_DocsByMark", acViewReport
+                DoCmd.OpenReport "rpt_DocsByMark", acViewPreview
                 'DoCmd.Minimize acForm, "frm_DocsByMark"
                 
                 PreviousForm = ""
@@ -530,5 +531,7 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+
+
 
 

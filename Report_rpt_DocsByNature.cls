@@ -9,6 +9,13 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Compare Database
 Option Explicit
+
+Private Sub Report_Load()
+
+    DoCmd.ShowToolbar "Ribbon", acToolbarYes
+
+End Sub
+
 Private Sub Report_NoData(Cancel As Integer)
 On Error GoTo ErrHandler
 
@@ -97,6 +104,7 @@ On Error GoTo ErrHandler
 
 
 'DoCmd.Close acReport, "rpt_DocsByNature", acSaveNo
+DoCmd.ShowToolbar "Ribbon", acToolbarNo
 DoCmd.OpenForm "frm_DocByNature", acNormal
 
 'Dim frm As Form

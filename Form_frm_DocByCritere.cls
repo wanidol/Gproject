@@ -17,6 +17,7 @@ Dim rstNature As New ADODB.Recordset
 Dim rstEtatdate As New ADODB.Recordset
 Dim rstDate As New ADODB.Recordset
 Dim rstComment As New ADODB.Recordset
+Dim rstDesc As New ADODB.Recordset
 Dim cn As New ADODB.Connection
 Dim Status As String
 
@@ -211,8 +212,8 @@ Resume Exit_Sub
 End Function
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
     Dim i As Integer
@@ -221,6 +222,8 @@ On Error GoTo ErrHandler
     GB_RPT_TITLE = ""
     'Clear all Controls
     Call ClearAll(Me)
+    
+'    txtDesc.Locked = True
     
     If GB_LANG = "EN" Then
         lblHeader.Caption = "Documents of a criterion"
@@ -271,11 +274,11 @@ On Error GoTo ErrHandler
         
         'Type
         With rstType
-            Sql = "SELECT DISTINCT  CODE_TYPE_CRITERE FROM liens "
+            sql = "SELECT DISTINCT  CODE_TYPE_CRITERE FROM liens "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbTypeID.Recordset = rstType
@@ -283,22 +286,22 @@ On Error GoTo ErrHandler
         'Critere
         
         With rstCritere
-           Sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
+           sql = "SELECT DISTINCT CRITERE_MOT_CLE FROM LIENS order by CRITERE_MOT_CLE "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbCritereId.Recordset = rstCritere
         
         'NatureID
         With rstNature
-            Sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
+            sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbNatureID.Recordset = rstNature
@@ -316,12 +319,13 @@ On Error GoTo ErrHandler
 '        Loop
        'Etat Date
         With rstEtatdate
-            Sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
+        
         
         Set cmbEtatStart.Recordset = rstEtatdate
         Set cmbEtatEnd.Recordset = rstEtatdate
@@ -330,11 +334,11 @@ On Error GoTo ErrHandler
         
         'Origine Date
         With rstDate
-            Sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
+            sql = "SELECT DISTINCT DATE_ORIGINE_DOCUMENT FROM Documents ORDER BY DATE_ORIGINE_DOCUMENT "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbStart.Recordset = rstDate
@@ -345,11 +349,11 @@ On Error GoTo ErrHandler
         'comment
         
          With rstComment
-            Sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
+            sql = "SELECT COMMENTAIRES_SUIVI FROM Documents ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         
         Set cmbComment.Recordset = rstComment
@@ -374,19 +378,19 @@ Resume Exit_Sub
 End Sub
 Private Sub BuildSql()
 On Error GoTo ErrHandler
-    Dim typeId As String
-    Dim CritereId As String
+    Dim typeID As String
+    Dim critereID As String
     
     publicSql = ""
    
-    typeId = cmbTypeID.Value
-    CritereId = cmbCritereId.Value
+    typeID = cmbTypeID.Value
+    critereID = cmbCritereId.Value
     
     publicSql = "SELECT d.NUMERO_DOCUMENT,d.CODE_NATURE_DOCUMENT," & _
                             "d.INDICE_MODIFICATION,d.LIBELLE_DOCUMENT,d.COMMENTAIRES_SUIVI," & _
                             "d.DATE_ETAT_DOCUMENT,d.DATE_ORIGINE_DOCUMENT,d.CODE_REPERE_MARQUAGE " & _
                             "FROM DOCUMENTS d " & _
-                            "INNER JOIN (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeId & "' And CRITERE_MOT_CLE ='" & CritereId & "') doc_num " & _
+                            "INNER JOIN (Select NUMERO_DOCUMENT from Liens where CODE_TYPE_CRITERE='" & typeID & "' And CRITERE_MOT_CLE ='" & critereID & "') doc_num " & _
                             "On d.NUMERO_DOCUMENT = doc_num.NUMERO_DOCUMENT ORDER BY d.NUMERO_DOCUMENT "
                             
 
@@ -400,6 +404,53 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+'
+'Private Sub cmbCritereID_Change()
+'On Error GoTo ErrHandler
+'Dim typeID As String
+'Dim critereID As String
+'Dim sql As String
+'
+'    txtDesc.Locked = False
+'    txtDesc.Value = ""
+'
+'    If Not (cmbTypeID.ListIndex = -1) And Not (cmbCritereId.ListIndex = -1) Then
+'
+'        typeID = cmbTypeID.Value
+'        critereID = cmbCritereId.Value
+'
+'        If cn.State = adStateOpen Then cn.Close
+'        Set cn = CurrentProject.AccessConnection
+'        If rstDesc.State = adStateOpen Then rstDesc.Close
+'
+'        With rstDesc
+'            sql = "SELECT LIBELLE_CRITERE FROM TYPES_CRITERES_NATURE where CODE_NATURE_DOCUMENT = '" & typeID & "' AND CODE_TYPE_CRITERE = '" & critereID & "'"
+'            .CursorType = adOpenDynamic
+'            .CursorLocation = adUseClient
+'            .LockType = adLockOptimistic
+'            .Open sql, cn, , , adCmdText
+'        End With
+'
+'        If Not (rstDesc.BOF And rstDesc.EOF) Then
+'            With rstDesc.Fields
+'                txtDesc = .Item("LIBELLE_CRITERE").Value
+'
+'            End With
+'            txtDesc.Locked = True
+'
+'        End If
+'    End If
+'
+'Exit_Sub:
+'    Exit Sub
+'
+'ErrHandler:
+'    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+'    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+'
+'Resume Exit_Sub
+'
+'End Sub
 
 Private Sub cmbEtatStart_Change()
 On Error GoTo ErrHandler
@@ -423,6 +474,7 @@ Resume Exit_Sub
 
 End Sub
 
+
 Private Sub cmbStart_Change()
 On Error GoTo ErrHandler
     
@@ -445,6 +497,52 @@ Resume Exit_Sub
     
 End Sub
 
+'Private Sub cmbTypeID_Change()
+'On Error GoTo ErrHandler
+'Dim typeID As String
+'Dim critereID As String
+'Dim sql As String
+'
+'    txtDesc.Locked = False
+'    txtDesc.Value = ""
+'
+'    If Not (cmbTypeID.ListIndex = -1) And Not (cmbCritereId.ListIndex = -1) Then
+'
+'        typeID = cmbTypeID.Value
+'        critereID = cmbCritereId.Value
+'
+'        If cn.State = adStateOpen Then cn.Close
+'        Set cn = CurrentProject.AccessConnection
+'        If rstDesc.State = adStateOpen Then rstDesc.Close
+'
+'        With rstDesc
+'            sql = "SELECT LIBELLE_CRITERE FROM TYPES_CRITERES_NATURE where CODE_NATURE_DOCUMENT = '" & typeID & "' AND CODE_TYPE_CRITERE = '" & critereID & "'"
+'            .CursorType = adOpenDynamic
+'            .CursorLocation = adUseClient
+'            .LockType = adLockOptimistic
+'            .Open sql, cn, , , adCmdText
+'        End With
+'
+'        If Not (rstDesc.BOF And rstDesc.EOF) Then
+'            With rstDesc.Fields
+'                txtDesc = .Item("LIBELLE_CRITERE").Value
+'
+'            End With
+'             txtDesc.Locked = True
+'
+'        End If
+'    End If
+'
+'Exit_Sub:
+'    Exit Sub
+'
+'ErrHandler:
+'    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+'    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+'
+'Resume Exit_Sub
+'End Sub
+
 Private Sub cmdPrint_Click()
 On Error GoTo ErrHandler
    
@@ -464,7 +562,8 @@ On Error GoTo ErrHandler
             
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
-                CurrentDb.QueryDefs("qry_DocCritere").Sql = publicSql
+                CurrentDb.QueryDefs("qry_DocByCritere").sql = publicSql
+                
                 GB_RPT_TITLE = Nz(cmbTypeID.Value, "-") & ";" & _
                     Nz(cmbCritereId.Value, "-") & ";" & _
                     Nz(cmbNatureID.Value, "-") & ";" & _
@@ -475,12 +574,12 @@ On Error GoTo ErrHandler
                     Nz(cmbCritereLinked.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
     
-                DoCmd.OpenReport "rpt_DocsByCritere", acViewReport
+                DoCmd.OpenReport "rpt_DocsByCritere", acViewPreview
                 'DoCmd.Minimize acForm, "frm_DocsByCritere"
                 PreviousForm = ""
                 PreviousForm = Me.Name
                 
-                DoCmd.Close acForm, "frm_DocByNature"
+                DoCmd.Close acForm, "frm_DocByCritere"
     
             Else
 

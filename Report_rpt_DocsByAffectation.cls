@@ -10,6 +10,10 @@ Attribute VB_Exposed = False
 Option Compare Database
 Option Explicit
 
+Private Sub Report_Load()
+    DoCmd.ShowToolbar "Ribbon", acToolbarYes
+End Sub
+
 'Private Sub PrintReport()
 '
 '    Dim oDoc As clsDocuments
@@ -124,16 +128,11 @@ Private Sub Report_Close()
 On Error GoTo ErrHandler
 
 
-DoCmd.Close acReport, "rpt_DocsByAffectation", acSaveNo
-'DoCmd.OpenForm "frm_DocByAffectation", acNormal
-'Dim frm As Form
-'
-'    For Each frm In Application.Forms
-'        If frm.Name = PreviousForm Then
-'            frm.Visible = True
-'            Exit For
-'        End If
-'    Next frm
+'DoCmd.Close acReport, "rpt_DocsByAffectation", acSaveNo
+DoCmd.ShowToolbar "Ribbon", acToolbarNo
+DoCmd.OpenForm "frm_DocByAffectation", acNormal
+
+ 
 
 Exit_Sub:
     Exit Sub
@@ -144,5 +143,4 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
-
 

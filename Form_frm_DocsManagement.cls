@@ -27,7 +27,7 @@ On Error GoTo ErrHandler
 
     Dim Sql1 As String
     Dim Sql2 As String
-    Dim typeId As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
     
@@ -194,6 +194,7 @@ Dim frm As Form
 
     For Each frm In Application.Forms
         If frm.Name = PreviousForm Then
+            'Call ClearAll(frm)
             frm.Visible = True
             Exit For
         End If

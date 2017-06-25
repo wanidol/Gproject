@@ -55,10 +55,11 @@ End Function
 Private Sub UserForm_Initialize()
 On Error GoTo ErrHandler
 
-    Dim Sql As String
-    Dim typeId As String
+    Dim sql As String
+    Dim typeID As String
     Dim critId As String
     Dim docNum As String
+    Dim i As Double
 
 'Clear all Controls
 
@@ -103,13 +104,26 @@ On Error GoTo ErrHandler
         If rs1.State = adStateOpen Then rs1.Close
         
         With rs1
-            Sql = "SELECT NUMERO_DOCUMENT FROM DOCUMENTS ORDER BY NUMERO_DOCUMENT  "
+            sql = "SELECT NUMERO_DOCUMENT,LIBELLE_DOCUMENT FROM DOCUMENTS ORDER BY NUMERO_DOCUMENT  "
             .CursorType = adOpenDynamic
             .CursorLocation = adUseClient
             .LockType = adLockOptimistic
-            .Open Sql, cn, , , adCmdText
+            .Open sql, cn, , , adCmdText
         End With
         Set cmbDocId.Recordset = rs1
+'    i = 0
+'
+'        Do While Not rs1.EOF
+'            With rs1
+'                cmbDocId.AddItem (.Fields("NUMERO_DOCUMENT") & ";" & .Fields("LIBELLE_DOCUMENT"))
+'                i = i + 1
+'                rs1.MoveNext
+'            End With
+'
+'        Loop
+'
+'  Debug.Print i
+        
         'cmbDocId.Selected(0) = True
         
         With Me.cmbDocId
@@ -148,12 +162,12 @@ End Sub
 
 Private Sub cmdFind_Click()
 On Error GoTo ErrHandler
-    Dim Sql As String
+    Dim sql As String
     Dim docNum As String
     Dim i As Integer
 
     If CheckValid() Then
-        docNum = cmbDocId.Value
+        docNum = cmbDocId.Column(0)
 '        natureId = cmbNatureID.Value
 '        etatId = cmbEtatID.Value
     
@@ -167,14 +181,14 @@ On Error GoTo ErrHandler
             'only nature=>SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'pqp'
             'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' ORDER BY NUMERO_DOCUMENT
             'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' And CODE_ETAT_DOCUMENT = 'FM' ORDER BY NUMERO_DOCUMENT
-             Sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
+             sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
                     "CODE_ETAT_DOCUMENT,INDICE_MODIFICATION," & _
                     "DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
                     "FROM DOCUMENTS WHERE NUMERO_DOCUMENT ='" & docNum & "' ORDER BY NUMERO_DOCUMENT"
                 .CursorType = adOpenDynamic
                 .CursorLocation = adUseClient
                 .LockType = adLockOptimistic
-                .Open Sql, cn, , , adCmdText
+                .Open sql, cn, , , adCmdText
             End With
             
             'Record Found
@@ -256,5 +270,4 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
-
 
