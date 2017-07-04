@@ -7,17 +7,27 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_workRequest
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 
 Option Explicit
-Dim Db As Database
-Dim rst As New ADODB.Recordset
-Dim rs1 As New ADODB.Recordset
-Dim rs2 As New ADODB.Recordset
-Dim cn As New ADODB.Connection
-Dim Status As String
 
-Dim moreSql As String
+
+
 
 
 Private Sub cmdAffection_Click()
@@ -110,10 +120,10 @@ On Error GoTo ErrHandler
 
     If GB_LANG = "EN" Then
         lblHeader.Caption = "Work Request"
-        lblNature.Caption = "List Of Nature Documents"
-        lblMark.Caption = "List of Marking Documents"
-        lblCritere.Caption = "List of Criteria Documents"
-        lblAffectation.Caption = "List of Affectation Documents"
+        lblNature.Caption = "Document List by Nature"
+        lblMark.Caption = "Document List by Stamp"
+        lblCritere.Caption = "Document List by Criteria"
+        lblAffectation.Caption = "Document List by Assignement"
     Else 'FR
         lblHeader.Caption = "Demandes de travaux"
         lblNature.Caption = "Liste des documents d'une nature"

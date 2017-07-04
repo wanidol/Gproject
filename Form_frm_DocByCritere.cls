@@ -7,6 +7,20 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'---------------------------------------------------------------------------------------
+' Procedure : frm_DocsByCritere
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -53,7 +67,7 @@ On Error GoTo ErrHandler
             If GB_LANG = "EN" Then
                 MsgBox "Invalid Criteria Code", vbOKOnly
             Else
-                MsgBox "Invalide Critère", vbOKOnly
+                MsgBox "Critère Invalide ", vbOKOnly
             End If
             
             CheckValid = False
@@ -67,7 +81,7 @@ On Error GoTo ErrHandler
                 'case invalid data
                 If Not IsNull(cmbNatureID.Value) Then
                     If GB_LANG = "Fr" Then
-                       MsgBox "Invalide Nature", vbOKOnly
+                       MsgBox "Nature Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid Nature Code", vbOKOnly
                     End If
@@ -91,7 +105,7 @@ On Error GoTo ErrHandler
                 Else
                     'end invalid
                     If GB_LANG = "Fr" Then
-                       MsgBox "Invalide date de fin", vbOKOnly
+                       MsgBox "Date de fin Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid end date", vbOKOnly
                     End If
@@ -106,7 +120,7 @@ On Error GoTo ErrHandler
                 'Case Invalid start
                 If Not IsNull(cmbEtatStart.Value) Then
                     If GB_LANG = "Fr" Then
-                       MsgBox "Invalide date de début", vbOKOnly
+                       MsgBox "Date de début Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid start date", vbOKOnly
                     End If
@@ -129,10 +143,10 @@ On Error GoTo ErrHandler
                     End If
                 Else
                     'invalid end
-                    If GB_LANG = "Fr" Then
-                       MsgBox "Invalide date de fin", vbOKOnly
+                   If GB_LANG = "Fr" Then
+                       MsgBox "Date de fin Invalide ", vbOKOnly
                     Else
-                        MsgBox "Invalid End Date", vbOKOnly
+                        MsgBox "Invalid end date", vbOKOnly
                     End If
                     
                     cmbEnd.SetFocus
@@ -144,7 +158,7 @@ On Error GoTo ErrHandler
                 'case Invalid start
                 If Not IsNull(cmbStart.Value) Then
                     If GB_LANG = "Fr" Then
-                        MsgBox "Invalide date de début", vbOKOnly
+                       MsgBox "Date de début Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid start date", vbOKOnly
                     End If
@@ -156,30 +170,11 @@ On Error GoTo ErrHandler
                 
             End If
             
-            If Not (cmbCritereLinked.ListIndex = -1) Then
-                If (cmbNatureID.ListIndex = -1) And (cmbEtatStart.ListIndex = -1) And (cmbStart.ListIndex = -1) Then
-                    moreSql = "WHERE d.COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
-                Else
-                    moreSql = moreSql & " AND d.COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
-                End If
-            Else
-                'Case Invalid Critere linked
-                 If Not IsNull(cmbCritereLinked.Value) Then
-                    If GB_LANG = "Fr" Then
-                       MsgBox "Invalide lié critère", vbOKOnly
-                    Else
-                        MsgBox "Invalid Criteria linked", vbOKOnly
-                    End If
-                    
-                    cmbCritereLinked.SetFocus
-                    CheckValid = False
-                    Exit Function
-                End If
-                
-            End If
+         
             
             If Not (cmbComment.ListIndex = -1) Then
-                If (cmbNatureID.ListIndex = -1) And (cmbEtatStart.ListIndex = -1) And (cmbStart.ListIndex = -1) And (cmbCritereLinked.ListIndex = -1) Then
+         
+                If (cmbNatureID.ListIndex = -1) And (cmbEtatStart.ListIndex = -1) And (cmbStart.ListIndex = -1) Then
                     moreSql = "WHERE d.COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
                 Else
                     moreSql = moreSql & " AND d.COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
@@ -188,7 +183,7 @@ On Error GoTo ErrHandler
                 'Case Invalid Comment
                  If Not IsNull(cmbComment.Value) Then
                     If GB_LANG = "Fr" Then
-                       MsgBox "Invalide commentaire", vbOKOnly
+                       MsgBox "Commentaire Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid Comment", vbOKOnly
                     End If
@@ -223,22 +218,20 @@ On Error GoTo ErrHandler
     'Clear all Controls
     Call ClearAll(Me)
     
-'    txtDesc.Locked = True
-    
+   
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Documents of a criterion"
+        lblHeader.Caption = "Documents by Criteria"
         lblBox1.Caption = "Required information :"
         lblbox2.Caption = "Optional information :"
         lblComment.Caption = "Comment : "
         lblDate.Caption = "Date"
         lblEStart.Caption = "start : "
         lblEStop.Caption = "end : "
-        lblEtat.Caption = "Status : "
+        lblEtat.Caption = "Status"
         lblNature.Caption = "Nature Code : "
         lblStart.Caption = "start : "
         lblStop.Caption = "end : "
-        lblCritere.Caption = "Criterion No."
-        lblCritereLinked.Caption = "Related Criteria"
+        lblCritere.Caption = "Criteria N°"
         lblTypeCode.Caption = "Type Code"
         
         
@@ -250,12 +243,11 @@ On Error GoTo ErrHandler
         lblDate.Caption = "Date"
         lblEStart.Caption = "début : "
         lblEStop.Caption = "fin : "
-        lblEtat.Caption = "Etat : "
+        lblEtat.Caption = "Etat"
         lblNature.Caption = "Nature : "
         lblStart.Caption = "début : "
         lblStop.Caption = "fin : "
         lblCritere.Caption = "N° critère :"
-        lblCritereLinked.Caption = "Critères liés : "
         lblTypeCode.Caption = "Type : "
         
     End If
@@ -282,6 +274,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbTypeID.Recordset = rstType
+        Set rstType = Nothing
         
         'Critere
         
@@ -294,6 +287,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbCritereId.Recordset = rstCritere
+        Set rstCritere = Nothing
         
         'NatureID
         With rstNature
@@ -305,18 +299,8 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbNatureID.Recordset = rstNature
-'        i = 0
-'        Do While Not rstNature.EOF
-'            With rstNature
-'                cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value)
-''                cmbNatureID.List(i, 0) = .Fields("CODE_NATURE_DOCUMENT").Value
-''                cmbNatureID.Column(i, 1) = .Fields("LIBELLE_NATURE_DOCUMENT").Value
-'               ' cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value & " : " & .Fields("LIBELLE_NATURE_DOCUMENT").Value)
-'                i = i + 1
-'                rstNature.MoveNext
-'            End With
-'
-'        Loop
+        Set rstNature = Nothing
+
        'Etat Date
         With rstEtatdate
             sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
@@ -329,6 +313,7 @@ On Error GoTo ErrHandler
         
         Set cmbEtatStart.Recordset = rstEtatdate
         Set cmbEtatEnd.Recordset = rstEtatdate
+        Set rstEtatdate = Nothing
         cmbEtatEnd.Enabled = False
         
         
@@ -343,6 +328,7 @@ On Error GoTo ErrHandler
         
         Set cmbStart.Recordset = rstDate
         Set cmbEnd.Recordset = rstDate
+        Set rstDate = Nothing
         cmbEnd.Enabled = False
         
         
@@ -357,6 +343,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbComment.Recordset = rstComment
+        Set rstComment = Nothing
         
         
         'set focus on Nature Code default first listindex
@@ -404,53 +391,7 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
-'
-'Private Sub cmbCritereID_Change()
-'On Error GoTo ErrHandler
-'Dim typeID As String
-'Dim critereID As String
-'Dim sql As String
-'
-'    txtDesc.Locked = False
-'    txtDesc.Value = ""
-'
-'    If Not (cmbTypeID.ListIndex = -1) And Not (cmbCritereId.ListIndex = -1) Then
-'
-'        typeID = cmbTypeID.Value
-'        critereID = cmbCritereId.Value
-'
-'        If cn.State = adStateOpen Then cn.Close
-'        Set cn = CurrentProject.AccessConnection
-'        If rstDesc.State = adStateOpen Then rstDesc.Close
-'
-'        With rstDesc
-'            sql = "SELECT LIBELLE_CRITERE FROM TYPES_CRITERES_NATURE where CODE_NATURE_DOCUMENT = '" & typeID & "' AND CODE_TYPE_CRITERE = '" & critereID & "'"
-'            .CursorType = adOpenDynamic
-'            .CursorLocation = adUseClient
-'            .LockType = adLockOptimistic
-'            .Open sql, cn, , , adCmdText
-'        End With
-'
-'        If Not (rstDesc.BOF And rstDesc.EOF) Then
-'            With rstDesc.Fields
-'                txtDesc = .Item("LIBELLE_CRITERE").Value
-'
-'            End With
-'            txtDesc.Locked = True
-'
-'        End If
-'    End If
-'
-'Exit_Sub:
-'    Exit Sub
-'
-'ErrHandler:
-'    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
-'    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
-'
-'Resume Exit_Sub
-'
-'End Sub
+
 
 Private Sub cmbEtatStart_Change()
 On Error GoTo ErrHandler
@@ -497,52 +438,6 @@ Resume Exit_Sub
     
 End Sub
 
-'Private Sub cmbTypeID_Change()
-'On Error GoTo ErrHandler
-'Dim typeID As String
-'Dim critereID As String
-'Dim sql As String
-'
-'    txtDesc.Locked = False
-'    txtDesc.Value = ""
-'
-'    If Not (cmbTypeID.ListIndex = -1) And Not (cmbCritereId.ListIndex = -1) Then
-'
-'        typeID = cmbTypeID.Value
-'        critereID = cmbCritereId.Value
-'
-'        If cn.State = adStateOpen Then cn.Close
-'        Set cn = CurrentProject.AccessConnection
-'        If rstDesc.State = adStateOpen Then rstDesc.Close
-'
-'        With rstDesc
-'            sql = "SELECT LIBELLE_CRITERE FROM TYPES_CRITERES_NATURE where CODE_NATURE_DOCUMENT = '" & typeID & "' AND CODE_TYPE_CRITERE = '" & critereID & "'"
-'            .CursorType = adOpenDynamic
-'            .CursorLocation = adUseClient
-'            .LockType = adLockOptimistic
-'            .Open sql, cn, , , adCmdText
-'        End With
-'
-'        If Not (rstDesc.BOF And rstDesc.EOF) Then
-'            With rstDesc.Fields
-'                txtDesc = .Item("LIBELLE_CRITERE").Value
-'
-'            End With
-'             txtDesc.Locked = True
-'
-'        End If
-'    End If
-'
-'Exit_Sub:
-'    Exit Sub
-'
-'ErrHandler:
-'    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
-'    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
-'
-'Resume Exit_Sub
-'End Sub
-
 Private Sub cmdPrint_Click()
 On Error GoTo ErrHandler
    
@@ -571,7 +466,6 @@ On Error GoTo ErrHandler
                     Nz(cmbEtatEnd.Value, "-") & ";" & _
                     Nz(cmbStart.Value, "-") & ";" & _
                     Nz(cmbEnd.Value, "-") & ";" & _
-                    Nz(cmbCritereLinked.Value, "-") & ";" & _
                     Nz(cmbComment.Value, "-") & ";"
     
                 DoCmd.OpenReport "rpt_DocsByCritere", acViewPreview

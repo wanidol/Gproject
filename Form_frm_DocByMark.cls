@@ -8,6 +8,20 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
+'---------------------------------------------------------------------------------------
+' Procedure : frm_DocsByMark
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -37,7 +51,7 @@ On Error GoTo ErrHandler
         If GB_LANG = "EN" Then
             MsgBox "Invalid Mark Code", vbOKOnly
         Else
-            MsgBox "Invalide N° de marquage", vbOKOnly
+            MsgBox "N° de marquage Invalide ", vbOKOnly
         End If
         
         cmbMarkID.SetFocus
@@ -48,13 +62,13 @@ On Error GoTo ErrHandler
     Else 'else main if
     
         If Not (cmbNatureID.ListIndex = -1) Then
-            'moreSql = " And CODE_NATURE_DOCUMENT = '" & cmbNatureID.Value & "'"
+            
              NatureID = cmbNatureID.Value
         
         Else 'case invalid data
             If Not IsNull(cmbNatureID.Value) Then
                 If GB_LANG = "Fr" Then
-                   MsgBox "Invalide Nature", vbOKOnly
+                   MsgBox " Nature Invalide", vbOKOnly
                 Else
                     MsgBox "Invalid Nature Code", vbOKOnly
                 End If
@@ -67,7 +81,7 @@ On Error GoTo ErrHandler
         End If
         
         If Not (cmbEtatStart.ListIndex = -1) Then
-            'moreSql = moreSql & " And DATE_ETAT_DOCUMENT BETWEEN '" & cmbEtatStart.Value & "' AND '" & cmbEtatEnd.Value & "'"
+            
             'start ok
                 If Not (cmbEtatEnd.ListIndex = -1) Then
                  'end ok
@@ -75,7 +89,7 @@ On Error GoTo ErrHandler
                     
                 Else 'valid data listindex = -1 and not null end not ok
                     If GB_LANG = "Fr" Then
-                        MsgBox "Invalide date de fin", vbOKOnly
+                        MsgBox "Date de fin Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid end date", vbOKOnly
                     End If
@@ -88,7 +102,7 @@ On Error GoTo ErrHandler
         Else 'case invalid data
             If Not IsNull(cmbEtatStart.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide date de début", vbOKOnly
+                    MsgBox "Date de début Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid start date", vbOKOnly
                 End If
@@ -110,7 +124,7 @@ On Error GoTo ErrHandler
             Else
             'end not Ok
                  If GB_LANG = "Fr" Then
-                        MsgBox "Invalide date de fin", vbOKOnly
+                        MsgBox "Date de fin Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid end date", vbOKOnly
                     End If
@@ -124,7 +138,7 @@ On Error GoTo ErrHandler
             If Not IsNull(cmbStart.Value) Then
                 
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide date de début", vbOKOnly
+                    MsgBox "Date de début Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid start date", vbOKOnly
                 End If
@@ -135,17 +149,16 @@ On Error GoTo ErrHandler
             End If
        
         End If
-        'And DATE_ETAT_DOCUMENT BETWEEN '01/01/91' AND '01/02/00' And DATE_ORIGINE_DOCUMENT BETWEEN '01/02/00' AND '01/02/88' AND COMMENTAIRES_SUIVI = 'ESSAIS SOUDAGE'
-        
+              
         
         If Not (cmbComment.ListIndex = -1) Then
             moreSql = moreSql & " AND COMMENTAIRES_SUIVI = '" & cmbComment.Value & "'"
         Else 'case invalid data listindex = -1
             If Not IsNull(cmbComment.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide Commentaire", vbOKOnly
+                    MsgBox "Commentaire Invalide ", vbOKOnly
                 Else
-                    MsgBox "Invalid Comment Data", vbOKOnly
+                    MsgBox "Invalid Comment", vbOKOnly
                 End If
                 cmbComment.SetFocus
                 CheckValid = False
@@ -154,13 +167,13 @@ On Error GoTo ErrHandler
         End If
         
         If Not (cmbCritere.ListIndex = -1) Then
-            'moreSql = moreSql & " And CRITERE_MOT_CLE = '" & cmbCritere.Value & "'"
-             critereID = cmbCritere.Value
+           
+           critereID = cmbCritere.Value
              
         Else 'case invalid data listindex = -1
             If Not IsNull(cmbCritere.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide Critère", vbOKOnly
+                    MsgBox "Critère Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid Criteria Code", vbOKOnly
                 End If
@@ -180,6 +193,7 @@ ErrHandler:
     VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
     
 Resume Exit_Sub
+
 End Function
 
 Private Sub UserForm_Initialize()
@@ -199,14 +213,15 @@ On Error GoTo ErrHandler
     Call ClearAll(Me)
     
    If GB_LANG = "EN" Then
-        lblHeader.Caption = "List of documents of a part marking"
+        lblHeader.Caption = "Document List by stamp"
         lblBox1.Caption = "Informations obligatoires :"
         lblbox2.Caption = "Informations facultatives :"
+        lblMark.Caption = "Part Stamp :"
         lblComment.Caption = "Comment : "
         lblDate.Caption = "Date"
         lblEStart.Caption = "start : "
         lblEStop.Caption = "end : "
-        lblEtat.Caption = "Status : "
+        lblEtat.Caption = "Status"
         lblNature.Caption = "Nature Code : "
         lblStart.Caption = "start : "
         lblStop.Caption = "end : "
@@ -216,11 +231,12 @@ On Error GoTo ErrHandler
         lblHeader.Caption = "Liste des documents d'un marquage de pièce"
         lblBox1.Caption = "Informations obligatoires :"
         lblbox2.Caption = "Informations facultatives :"
+        lblMark.Caption = "Marquage de pièce: "
         lblComment.Caption = "Commentaires : "
         lblDate.Caption = "Date"
         lblEStart.Caption = "début : "
         lblEStop.Caption = "fin : "
-        lblEtat.Caption = "Etat : "
+        lblEtat.Caption = "Etat"
         lblNature.Caption = "Nature Code : "
         lblStart.Caption = "début : "
         lblStop.Caption = "fin : "
@@ -247,7 +263,7 @@ On Error GoTo ErrHandler
             .Open sql, cn, , , adCmdText
         End With
         Set cmbMarkID.Recordset = rstMark
-        
+        Set rstMark = Nothing
         'Nature
         With rstNature
             sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
@@ -257,6 +273,7 @@ On Error GoTo ErrHandler
             .Open sql, cn, , , adCmdText
         End With
         Set cmbNatureID.Recordset = rstNature
+        Set rstNature = Nothing
         
         'Etat Date
         With rstEtatdate
@@ -269,6 +286,7 @@ On Error GoTo ErrHandler
         
         Set cmbEtatStart.Recordset = rstEtatdate
         Set cmbEtatEnd.Recordset = rstEtatdate
+        Set rstEtatdate = Nothing
         
         cmbEtatEnd.Enabled = False
         
@@ -284,6 +302,7 @@ On Error GoTo ErrHandler
         
         Set cmbStart.Recordset = rstDate
         Set cmbEnd.Recordset = rstDate
+        Set rstDate = Nothing
         cmbEnd.Enabled = False
         
         
@@ -298,6 +317,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbComment.Recordset = rstComment
+        Set rstComment = Nothing
         
         
        'critere
@@ -310,6 +330,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbCritere.Recordset = rstCritere
+        Set rstCritere = Nothing
         
        
        
@@ -372,6 +393,7 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+    Set rst = Nothing
     DoCmd.OpenForm "frm_workRequest", acNormal
     DoCmd.Close acForm, "frm_DocByMark"
 
@@ -391,8 +413,7 @@ Dim MarkId As String
 
     publicSql = ""
     MarkId = cmbMarkID.Value
-   'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION,LIBELLE_DOCUMENT,COMMENTAIRES_SUIVI,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT,CODE_REPERE_MARQUAGE FROM DOCUMENTS WHERE CODE_REPERE_MARQUAGE ='001153' And DATE_ETAT_DOCUMENT BETWEEN '01/01/91' AND '01/02/00' And DATE_ORIGINE_DOCUMENT BETWEEN '01/02/00' AND '01/02/88' AND COMMENTAIRES_SUIVI = 'ESSAIS SOUDAGE' ORDER BY NUMERO_DOCUMENT
-   
+    
    
     If (NatureID = "") And (critereID = "") Then
                     
@@ -484,8 +505,7 @@ On Error GoTo ErrHandler
                     Nz(cmbCritere.Value, "-") & ";"
                
                 DoCmd.OpenReport "rpt_DocsByMark", acViewPreview
-                'DoCmd.Minimize acForm, "frm_DocsByMark"
-                
+                                
                 PreviousForm = ""
                 PreviousForm = Me.Name
                 
@@ -497,7 +517,6 @@ On Error GoTo ErrHandler
                 Else
                     MsgBox "Enregistrement non trouvé", vbOKOnly
                 End If
-                'Call ClearAll(Me)
                 cmbMarkID.SetFocus
             End If
                

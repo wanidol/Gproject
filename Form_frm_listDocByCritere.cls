@@ -8,6 +8,20 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
+'---------------------------------------------------------------------------------------
+' Procedure : frm_listDocByCritere
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -69,8 +83,7 @@ On Error GoTo ErrHandler
                     
                     If (cmbNatureID.ListIndex = -1) Then
                         cmbNatureID.SetFocus
-    '                Else
-    '                    cmbEtatID.SetFocus
+    
                     End If
                 
                     Exit Function
@@ -80,9 +93,9 @@ On Error GoTo ErrHandler
                         'check invalid input data
                         
                         If GB_LANG = "FR" Then
-                            MsgBox "Invalide Nature", vbOKOnly
+                            MsgBox "Nature Invalide", vbOKOnly
                         Else
-                            MsgBox "invalid Nature Code", vbOKOnly
+                            MsgBox "Invalid Nature Code", vbOKOnly
                         End If
                         CheckValid = False
                         cmbNatureID.SetFocus
@@ -99,9 +112,9 @@ On Error GoTo ErrHandler
                 If (cmbEtatID.ListIndex = -1) Then
                     If Not IsNull(cmbEtatID.Value) Then
                         If GB_LANG = "FR" Then
-                            MsgBox "Invalide Etat", vbOKOnly
+                            MsgBox "Etat Invalide ", vbOKOnly
                         Else
-                            MsgBox "invalid Status Code", vbOKOnly
+                            MsgBox "Invalid Status Code", vbOKOnly
                         End If
                         CheckValid = False
                         cmbEtatID.SetFocus
@@ -114,7 +127,7 @@ On Error GoTo ErrHandler
                 'case 2. nature ok etat ok
                     moreSql = " CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'" & _
                             " And CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
-                    'Debug.Print moreSql
+                    
                 End If
                 CheckValid = True
             End If
@@ -142,20 +155,20 @@ On Error GoTo ErrHandler
 'Clear all Controls
 Call ClearAll(Me)
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Liste des documents liés à un critère d'accès"
+        lblHeader.Caption = "Document list related to an access criteria"
         lblTypeCode.Caption = "Type :"
-        lblCritCode.Caption = "Criteria Code :"
+        lblCritCode.Caption = "Criteria N°:"
         lblNature.Caption = "Nature :"
         lblEtat.Caption = "Status :"
         
         'list
-        lblListDoc.Caption = "Document Number"
+        lblListDoc.Caption = "Document Ref"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Status"
         lblListInd.Caption = "Index"
         lblListEtatDate.Caption = "Status Date"
         lblListDesc.Caption = "Description"
-        lblListOriginDate.Caption = "Original Date"
+        lblListOriginDate.Caption = "Origin Date"
         
     Else 'FR
         lblHeader.Caption = "Liste des documents liés à un critère d'accès"
@@ -165,7 +178,7 @@ Call ClearAll(Me)
         lblEtat.Caption = "Etat :"
         
         'list
-        lblListDoc.Caption = "N° Document"
+        lblListDoc.Caption = "N° de Document"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Etat"
         lblListInd.Caption = "Ind"
@@ -224,6 +237,11 @@ If cn.State = adStateOpen Then cn.Close
     Set cmbCritereId.Recordset = rstCritere
     Set cmbNatureID.Recordset = rstNature
     
+    Set rstEtat = Nothing
+    Set rstType = Nothing
+    Set rstCritere = Nothing
+    Set rstNature = Nothing
+    
         
         With Me.cmbTypeID
             .Value = .ItemData(.ListIndex + 1)
@@ -245,9 +263,74 @@ Resume Exit_Sub
 End Sub
 
 
+Private Sub cmbCritereId_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
+Private Sub cmbEtatID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
+Private Sub cmbNatureID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
+Private Sub cmbTypeID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+    Set rst = Nothing
     DoCmd.OpenForm "frm_consultation", acNormal
     DoCmd.Close acForm, "frm_listDocByCritere"
 
@@ -296,7 +379,9 @@ Private Sub cmdFind_Click()
            
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
-                Set lstDocument.Recordset = rst
+                lstDocument.RowSource = sql
+                lstDocument.Requery
+                
                 lstDocument.Selected(0) = True
                 lstDocument.Enabled = True
     
@@ -308,10 +393,6 @@ Private Sub cmdFind_Click()
                     MsgBox "Enregistrement non trouvé", vbOKOnly
                 End If
             
-            
-                'MsgBox "Record Not Found!", vbOKOnly
-                'Call ClearAll(Me)
-                lstDocument.Enabled = False
                 cmbTypeID.SetFocus
  
             End If
@@ -352,9 +433,7 @@ Dim passData As String
     'passing document number for retriving data in frm_DocsManagement
     passData = lstDocument.Column(0)
 
-
     'for back to previous page
-
     PreviousForm = ""
 
     PreviousForm = Me.Name

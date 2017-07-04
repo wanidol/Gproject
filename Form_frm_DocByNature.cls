@@ -8,6 +8,20 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
+'---------------------------------------------------------------------------------------
+' Procedure : frm_DocsByNature
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -52,7 +66,7 @@ On Error GoTo ErrHandler
                 If GB_LANG = "EN" Then
                     MsgBox "Invalid end date", vbOKOnly
                 Else
-                    MsgBox "Invalide date de fin", vbOKOnly
+                    MsgBox "Date de fin Invalide ", vbOKOnly
                 End If
             
                 cmbEtatEnd.SetFocus
@@ -65,7 +79,7 @@ On Error GoTo ErrHandler
                 If GB_LANG = "EN" Then
                     MsgBox "Invalid Start date", vbOKOnly
                 Else
-                    MsgBox "Invalide date de début", vbOKOnly
+                    MsgBox "Date de début Invalide ", vbOKOnly
                 End If
         
                 cmbEtatStart.SetFocus
@@ -81,13 +95,12 @@ On Error GoTo ErrHandler
                 moreSql = moreSql & " And DATE_ORIGINE_DOCUMENT BETWEEN '" & cmbStart.Value & "' AND '" & cmbEnd.Value & "'"
             Else
                 'end invalid list index = -1 and not null
-                'If Not IsNull(cmbEnd.Value) Then
-                
-                    If GB_LANG = "EN" Then
-                        MsgBox "Invalid end date", vbOKOnly
-                    Else
-                        MsgBox "Invalide date de fin", vbOKOnly
-                    End If
+                                
+                If GB_LANG = "EN" Then
+                    MsgBox "Invalid end date", vbOKOnly
+                Else
+                    MsgBox "Date de fin Invalide ", vbOKOnly
+                End If
             
                     cmbEnd.SetFocus
                     CheckValid = False
@@ -101,7 +114,7 @@ On Error GoTo ErrHandler
                 If GB_LANG = "EN" Then
                     MsgBox "Invalid Start date", vbOKOnly
                 Else
-                    MsgBox "Invalide date de début", vbOKOnly
+                    MsgBox "Date de début Invalide ", vbOKOnly
                 End If
         
                 cmbStart.SetFocus
@@ -155,14 +168,14 @@ On Error GoTo ErrHandler
     Call ClearAll(Me)
     
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Documents of a Nature"
+        lblHeader.Caption = "Documents by Nature"
         lblBox1.Caption = "Required information :"
         lblbox2.Caption = "Optional information :"
         lblComment.Caption = "Comment : "
         lblDate.Caption = "Date"
         lblEStart.Caption = "start : "
         lblEStop.Caption = "end : "
-        lblEtat.Caption = "Status : "
+        lblEtat.Caption = "Status"
         lblNature.Caption = "Nature Code : "
         lblStart.Caption = "start : "
         lblStop.Caption = "end : "
@@ -176,7 +189,7 @@ On Error GoTo ErrHandler
         lblDate.Caption = "Date"
         lblEStart.Caption = "début : "
         lblEStop.Caption = "fin : "
-        lblEtat.Caption = "Etat : "
+        lblEtat.Caption = "Etat"
         lblNature.Caption = "Nature : "
         lblStart.Caption = "début : "
         lblStop.Caption = "fin : "
@@ -201,19 +214,10 @@ On Error GoTo ErrHandler
             .Open sql, cn, , , adCmdText
         End With
         Set cmbNatureID.Recordset = rstNature
+        Set rstNature = Nothing
         
-'        i = 0
-'        Do While Not rstNature.EOF
-'            With rstNature
-'                cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value)
-''                cmbNatureID.List(i, 0) = .Fields("CODE_NATURE_DOCUMENT").Value
-''                cmbNatureID.Column(i, 1) = .Fields("LIBELLE_NATURE_DOCUMENT").Value
-'               ' cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value & " : " & .Fields("LIBELLE_NATURE_DOCUMENT").Value)
-'                i = i + 1
-'                rstNature.MoveNext
-'            End With
-'
-'        Loop
+        
+
        'Etat Date
         With rstEtatdate
             sql = "SELECT DISTINCT DATE_ETAT_DOCUMENT FROM Documents WHERE DATE_ETAT_DOCUMENT IS NOT NULL  ORDER BY DATE_ETAT_DOCUMENT "
@@ -225,6 +229,7 @@ On Error GoTo ErrHandler
         
         Set cmbEtatStart.Recordset = rstEtatdate
         Set cmbEtatEnd.Recordset = rstEtatdate
+        Set rstEtatdate = Nothing
         cmbEtatEnd.Enabled = False
         
         
@@ -239,6 +244,7 @@ On Error GoTo ErrHandler
         
         Set cmbStart.Recordset = rstDate
         Set cmbEnd.Recordset = rstDate
+        Set rstDate = Nothing
         cmbEnd.Enabled = False
         
         
@@ -253,6 +259,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbComment.Recordset = rstComment
+        Set rstComment = Nothing
         
         
         'set focus on Nature Code default first listindex
@@ -315,6 +322,7 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+    Set rst = Nothing
     DoCmd.OpenForm "frm_workRequest", acNormal
     DoCmd.Close acForm, "frm_DocByNature"
 
@@ -386,13 +394,10 @@ On Error GoTo ErrHandler
                     Nz(cmbComment.Value, "-") & ";"
     
                 DoCmd.OpenReport "rpt_DocsByNature", acViewPreview
-                'DoCmd.Minimize acForm, "frm_DocsByNature"
-                
                 
                 PreviousForm = ""
                 PreviousForm = Me.Name
-                
-                
+                               
                 DoCmd.Close acForm, "frm_DocByNature"
     
             Else

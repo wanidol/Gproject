@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_Main
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -29,6 +44,7 @@ On Error GoTo ErrHandler
         cmdFr.Enabled = True
         lbl_MenuConsult.Caption = "Consultation/Research Documents"
         lbl_MenuWorkRequest.Caption = "Work Request"
+        lbl_Menutables.Caption = "All Tables Of Sidoq"
         'cmdConsult.SetFocus
     Else
         'Me.cmdExit.SetFocus 'Move focus before hiding button
@@ -40,6 +56,7 @@ On Error GoTo ErrHandler
         cmdFr.Enabled = False
         lbl_MenuConsult.Caption = "Consutation/Recherche des documents liés"
         lbl_MenuWorkRequest.Caption = "Demande de travaux"
+        lbl_Menutables.Caption = "Tables de Sidoq"
         'cmdConsult.SetFocus
     End If
     
@@ -116,13 +133,29 @@ Private Sub cmdFr_Click()
 
 End Sub
 
+Private Sub cmdTables_Click()
+On Error GoTo ErrHandler
+
+    DoCmd.OpenForm "frm_TablesDeSidoq", acNormal
+    DoCmd.Close acForm, "frm_Main"
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
 
 
 Private Sub cmdWorkRequest_Click()
 On Error GoTo ErrHandler
 
-DoCmd.OpenForm "frm_workRequest", acNormal
-DoCmd.Close acForm, "frm_Main"
+    DoCmd.OpenForm "frm_workRequest", acNormal
+    DoCmd.Close acForm, "frm_Main"
 
 Exit_Sub:
     Exit Sub
@@ -137,8 +170,9 @@ End Sub
 Private Sub Form_Load()
 On Error GoTo ErrHandler
     
-    'DoCmd.Maximize
+    'no toolbar
     DoCmd.ShowToolbar "Ribbon", acToolbarNo
+   
  
     If GB_LANG = "" Then
         Call InitGlobal
@@ -156,3 +190,17 @@ ErrHandler:
 Resume Exit_Sub
 End Sub
 
+Private Sub Form_Timer()
+On Error GoTo ErrHandler
+
+[txtTime] = Now
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub

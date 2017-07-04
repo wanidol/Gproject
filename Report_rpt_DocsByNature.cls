@@ -7,20 +7,27 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : rpt_DocsByNature
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   : Report of nature data
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 
 Private Sub Report_Load()
-
-    DoCmd.ShowToolbar "Ribbon", acToolbarYes
-
-End Sub
-
-Private Sub Report_NoData(Cancel As Integer)
 On Error GoTo ErrHandler
-
-    MsgBox "No data found! Closing report."
-    'DoCmd.Close acReport, "rpt_DocsByNature", acSaveNo
+    DoCmd.ShowToolbar "Ribbon", acToolbarYes
 
 Exit_Sub:
     Exit Sub
@@ -30,8 +37,9 @@ ErrHandler:
     VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
     
 Resume Exit_Sub
-
 End Sub
+
+
 Private Sub Report_Open(Cancel As Integer)
 On Error GoTo ErrHandler
     Dim strOpenArgs() As String
@@ -41,7 +49,7 @@ On Error GoTo ErrHandler
     If GB_LANG = "EN" Then
     
         lblRHComment.Caption = "Comment :"
-        lblRHeader.Caption = "List of Nature Documents"
+        lblRHeader.Caption = "Document List by Nature"
         lblRHEnd1.Caption = "end "
         lblRHEnd2.Caption = "end "
         lblRHEtat.Caption = "Status start :"
@@ -51,11 +59,13 @@ On Error GoTo ErrHandler
         
         lblHComment.Caption = "Comment"
         lblHDesc.Caption = "Description"
-        lblHDocNo.Caption = "Document No."
+        lblHDocNo.Caption = "Document Ref"
         lblHEtat.Caption = "Status"
         lblHIndex.Caption = "Index"
         lblHnature.Caption = "Nature Code"
         lblHOrigin.Caption = "Date Origin"
+        
+        lblNoRecord.Caption = "Number Of Record"
         
     Else 'FR
     
@@ -69,11 +79,13 @@ On Error GoTo ErrHandler
         
         lblHComment.Caption = "Commentaire"
         lblHDesc.Caption = "Libellé du document"
-        lblHDocNo.Caption = "N° Document"
+        lblHDocNo.Caption = "N° de Document"
         lblHEtat.Caption = "Etat"
         lblHIndex.Caption = "Indice"
         lblHnature.Caption = "Nature"
         lblHOrigin.Caption = "Origine Date"
+        
+        lblNoRecord.Caption = "Nombre d'enregistrement"
     
     End If
     
@@ -103,21 +115,10 @@ Private Sub Report_Close()
 On Error GoTo ErrHandler
 
 
-'DoCmd.Close acReport, "rpt_DocsByNature", acSaveNo
+'show toolbar when report open / hide toolbar when report close
 DoCmd.ShowToolbar "Ribbon", acToolbarNo
 DoCmd.OpenForm "frm_DocByNature", acNormal
 
-'Dim frm As Form
-'
-'    For Each frm In Application.Forms
-'        If frm.Name = PreviousForm Then
-'            frm.Visible = True
-'            Exit For
-'        End If
-'    Next frm
-
-
-    'DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
 Exit_Sub:
     Exit Sub
 

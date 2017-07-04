@@ -7,19 +7,29 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : rpt_DocsByMark
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 
 
 Private Sub Report_Load()
-DoCmd.ShowToolbar "Ribbon", acToolbarYes
-End Sub
-
-Private Sub Report_NoData(Cancel As Integer)
 On Error GoTo ErrHandler
 
-    MsgBox "No data found! Closing report."
-    'DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
+DoCmd.ShowToolbar "Ribbon", acToolbarYes
 
 Exit_Sub:
     Exit Sub
@@ -29,13 +39,14 @@ ErrHandler:
     VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
     
 Resume Exit_Sub
-
 End Sub
+
+
 Private Sub Report_Close()
 On Error GoTo ErrHandler
 
 
-'DoCmd.Close acReport, "rpt_DocsByMark", acSaveNo
+'show toolbar when report open / hide toolbar when report close
 DoCmd.ShowToolbar "Ribbon", acToolbarNo
 DoCmd.OpenForm "frm_DocByMark", acNormal
 
@@ -58,7 +69,7 @@ On Error GoTo ErrHandler
         
         lblRHComment.Caption = "Comment : "
         lblRHCritere.Caption = "Criteria :"
-        lblRHeader.Caption = "List of Marking Documents"
+        lblRHeader.Caption = "Document List by stamp"
         lblRHEtat.Caption = "Etat début "
         lblRHMarkID.Caption = "Mark Code : "
         lblRHEnd1.Caption = "end "
@@ -71,11 +82,13 @@ On Error GoTo ErrHandler
         lblHmark.Caption = "Mark Code"
         lblHComment.Caption = "Comment"
         lblHDesc.Caption = "Description"
-        lblHDocNo.Caption = "Document No."
+        lblHDocNo.Caption = "Document Ref"
         lblHEtat.Caption = "Status"
         lblHIndex.Caption = "Index"
         lblHnature.Caption = "Nature Code"
         lblHOrigin.Caption = "Date Origin"
+        
+        lblNoRecord.Caption = "Number Of Record"
         
     Else 'FR
     
@@ -95,11 +108,13 @@ On Error GoTo ErrHandler
         lblHmark.Caption = "Marquage"
         lblHComment.Caption = "Commentaire"
         lblHDesc.Caption = "Libellé du document"
-        lblHDocNo.Caption = "N° Document"
+        lblHDocNo.Caption = "N° de Document"
         lblHEtat.Caption = "Etat"
         lblHIndex.Caption = "Indice"
         lblHnature.Caption = "Nature"
         lblHOrigin.Caption = "Origine Date"
+        
+        lblNoRecord.Caption = "Nombre d'enregistrement"
     
     End If
     

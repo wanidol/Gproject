@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_listDocsByMark
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -28,14 +43,14 @@ On Error GoTo ErrHandler
     '1.2 nature ok etat no
 '2. nature ok and etat ok
 '3. no nature no etat
-    
+
     
     If IsNull(cmbMarkID.Value) Or (cmbMarkID.Value = "") Or (cmbMarkID.ListIndex = -1) Then
                 
         If GB_LANG = "FR" Then
             MsgBox "N° de Marguage Invalide", vbOKOnly
         Else
-            MsgBox "Invalid Mark Code", vbOKOnly
+            MsgBox "Invalid Stamp Code", vbOKOnly
         End If
         
         CheckValid = False
@@ -56,8 +71,7 @@ On Error GoTo ErrHandler
                 
                 If (cmbNatureID.ListIndex = -1) Then
                     cmbNatureID.SetFocus
-'                Else
-'                    cmbEtatID.SetFocus
+              
                 End If
                 
                 Exit Function
@@ -67,9 +81,9 @@ On Error GoTo ErrHandler
                     'check invalid input data
                     
                     If GB_LANG = "FR" Then
-                        MsgBox "Invalide Nature", vbOKOnly
+                        MsgBox "Nature Invalide ", vbOKOnly
                     Else
-                        MsgBox "invalid Nature Code", vbOKOnly
+                        MsgBox "Invalid Nature Code", vbOKOnly
                     End If
                     CheckValid = False
                     cmbNatureID.SetFocus
@@ -86,9 +100,9 @@ On Error GoTo ErrHandler
             If (cmbEtatID.ListIndex = -1) Then
                 If Not IsNull(cmbEtatID.Value) Then
                     If GB_LANG = "FR" Then
-                        MsgBox "Invalide Etat", vbOKOnly
+                        MsgBox "Etat Invalide ", vbOKOnly
                     Else
-                        MsgBox "invalid Status Code", vbOKOnly
+                        MsgBox "Invalid Status Code", vbOKOnly
                     End If
                     CheckValid = False
                     cmbEtatID.SetFocus
@@ -101,7 +115,7 @@ On Error GoTo ErrHandler
             'case 2. nature ok etat ok
                 moreSql = " And CODE_NATURE_DOCUMENT = '" & Trim(cmbNatureID.Value) & "'" & _
                             " And CODE_ETAT_DOCUMENT = '" & Trim(cmbEtatID.Value) & "'"
-                'Debug.Print moreSql
+                
             End If
             CheckValid = True
         End If
@@ -127,28 +141,30 @@ On Error GoTo ErrHandler
     'Clear all Controls
     Call ClearAll(Me)
     
+               
+    
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "List of Marking Documents"
+        lblHeader.Caption = "Document list related to a part stamp"
         lblNature.Caption = "Nature Code : "
-        lblMark.Caption = "Mark Number : "
+        lblMark.Caption = "Stamp Ref : "
         lblEtat.Caption = "Status :"
         'list
-        lblListDoc.Caption = "Document Number"
+        lblListDoc.Caption = "Document Ref"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Status"
         lblListInd.Caption = "Index"
         lblListEtatDate.Caption = "Status Date"
         lblListDesc.Caption = "Description"
-        lblListOriginDate.Caption = "Original Date"
+        lblListOriginDate.Caption = "Origin Date"
         
     Else 'FR
-        lblHeader.Caption = "Liste des documents liés à une pièce de marquage"
+        lblHeader.Caption = "Liste des documents liés à un marquage de pièce"
         lblNature.Caption = "Nature : "
         lblMark.Caption = "N° de marquage : "
         lblEtat.Caption = "Etat :"
         
         'list
-        lblListDoc.Caption = "N° Document"
+        lblListDoc.Caption = "N° de Document"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Etat"
         lblListInd.Caption = "Ind"
@@ -158,7 +174,7 @@ On Error GoTo ErrHandler
     End If
     
     DocumentKey = ""
-    lstDocument.Enabled = False
+    
     
     
     
@@ -177,6 +193,7 @@ On Error GoTo ErrHandler
         .Open sql, cn, , , adCmdText
     End With
     Set cmbMarkID.Recordset = rstMark
+    Set rstMark = Nothing
         
     With rstNature
         sql = "SELECT CODE_NATURE_DOCUMENT,LIBELLE_NATURE_DOCUMENT FROM Natures_document ORDER BY CODE_NATURE_DOCUMENT  "
@@ -186,6 +203,7 @@ On Error GoTo ErrHandler
         .Open sql, cn, , , adCmdText
     End With
     Set cmbNatureID.Recordset = rstNature
+    Set rstNature = Nothing
     
     With rstEtat
         sql = "SELECT DISTINCT CODE_ETAT_DOCUMENT FROM DOCUMENTS ORDER BY CODE_ETAT_DOCUMENT  "
@@ -195,7 +213,7 @@ On Error GoTo ErrHandler
         .Open sql, cn, , , adCmdText
     End With
     Set cmbEtatID.Recordset = rstEtat
-    
+    Set rstEtat = Nothing
     
     With Me.cmbMarkID
         .Value = .ItemData(.ListIndex + 1)
@@ -214,9 +232,60 @@ Resume Exit_Sub
 
 End Sub
 
+Private Sub cmbEtatID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+
+
+End Sub
+
+Private Sub cmbMarkID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
+Private Sub cmbNatureID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
+
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+    Set rst = Nothing
     DoCmd.OpenForm "frm_consultation", acNormal
     DoCmd.Close acForm, "frm_listDocByMark"
 
@@ -246,10 +315,7 @@ On Error GoTo ErrHandler
             If rst.State = adStateOpen Then rst.Close
             With rst
             
-            'data test 3 rows => select * from documents where code_repere_marquage='ABQQ' AND code_nature_document='PQP' and code_etat_document = 'FM';
-            'only nature=>SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'pqp'
-            'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' ORDER BY NUMERO_DOCUMENT
-            'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' And CODE_ETAT_DOCUMENT = 'FM' ORDER BY NUMERO_DOCUMENT
+           
              sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
                     "CODE_ETAT_DOCUMENT,INDICE_MODIFICATION," & _
                     "DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
@@ -262,7 +328,10 @@ On Error GoTo ErrHandler
             
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
-                Set lstDocument.Recordset = rst
+                             
+                lstDocument.RowSource = sql
+                lstDocument.Requery
+                
                 lstDocument.Selected(0) = True
                 lstDocument.Enabled = True
     
@@ -273,9 +342,6 @@ On Error GoTo ErrHandler
                     MsgBox "Enregistrement non trouvé", vbOKOnly
                 End If
             
-                'MsgBox "Record Not Found!", vbOKOnly
-                'Call ClearAll(Me)
-                lstDocument.Enabled = False
                 cmbMarkID.SetFocus
  
             End If

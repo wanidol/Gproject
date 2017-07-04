@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_DocsManagement
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -32,63 +47,63 @@ On Error GoTo ErrHandler
     Dim docNum As String
     
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Managing a Quality Document :"
-        lblAccord.Caption = "Customer Agreement :"
-        lblAffection.Caption = "Affectation :"
-        lblAvis.Caption = "Customer reviews :"
-        lblComment.Caption = "Comment :"
-        lblContractuel.Caption = "Contractual"
-        lblCritere.Caption = "CRITERIA (TYPE+NUMBER) :"
-        lblDelai.Caption = "Delivery time"
-        lblDiffuse.Caption = "Diffuse :"
-        lblDocNo.Caption = "N° Document :"
-        lblEtat.Caption = "Status :"
-        lblEtatDate.Caption = "Status Date :"
-        lblIndice.Caption = "Index :"
-        lblLibelle.Caption = "Wording :"
-        lblLocal.Caption = "Local(O-N) :"
-        lblMark.Caption = "Marking Part :"
-        lblNature.Caption = "Nature :"
-        lblNiveauT.Caption = "Treatment Level :"
-        lblOA.Caption = "Number OA"
-        lblOF.Caption = "Number OF"
-        lblOriginDate.Caption = "Date Origin"
-        lblProposition.Caption = "Proposal :"
-        lblTransmitted.Caption = "Transmitted for action :"
-        lblUC.Caption = "UC : "
+        lblHeader.Caption = "Quality Document Management: "
+        lblAccord.Caption = "Customer Agreement: "
+        lblAffection.Caption = "Assignement: "
+        lblAvis.Caption = "Customer reviews: "
+        lblComment.Caption = "Comment: "
+        lblContractuel.Caption = "Contractual: "
+        lblCritere.Caption = "CRITERIA (TYPE+REF): "
+        lblDelai.Caption = "Delivery time: "
+        lblDiffuse.Caption = "Diffuse: "
+        lblDocNo.Caption = "Document Ref: "
+        lblEtat.Caption = "Status: "
+        lblEtatDate.Caption = "Status Date: "
+        lblIndice.Caption = "Index: "
+        lblLibelle.Caption = "Wording: "
+        lblLocal.Caption = "Local(O-N): "
+        lblMark.Caption = "Stamp Part: "
+        lblNature.Caption = "Nature: "
+        lblNiveauT.Caption = "Treatment Level: "
+        lblOA.Caption = "OA Ref: "
+        lblOF.Caption = "OF Ref: "
+        lblOriginDate.Caption = "Date Origin: "
+        lblProposition.Caption = "Proposal: "
+        lblTransmitted.Caption = "Transmitted for action: "
+        lblUC.Caption = "UC: "
       
         'list
-        lblListCritere.Caption = ""
+        lblListCritere.Caption = "Criteria"
         lblListType.Caption = "Type"
         
     Else 'FR
         lblHeader.Caption = "Gestion d'un document qualité"
-        lblAccord.Caption = "Accord Client : "
-        lblAffection.Caption = "Affectation : "
-        lblAvis.Caption = "Avis Client : "
-        lblComment.Caption = "Commentaire : "
-        lblContractuel.Caption = "Contractuel : "
-        lblCritere.Caption = "CRITERES (Type+Numéro) :"
-        lblDelai.Caption = "Délai réception : "
-        lblDiffuse.Caption = "Diffusé:"
-        lblDocNo.Caption = "N° Document :"
-        lblEtat.Caption = "Etat :"
-        lblEtatDate.Caption = "Date état : "
-        lblIndice.Caption = "Indice :"
-        lblLibelle.Caption = "Libellé : "
-        lblLocal.Caption = "Local(O-N) : "
-        lblMark.Caption = "Marquage Pièce : "
-        lblNature.Caption = "Nature :"
-        lblNiveauT.Caption = "Niveau Traitement :"
+        lblAccord.Caption = "Accord Client: "
+        lblAffection.Caption = "Affectation: "
+        lblAvis.Caption = "Avis Client: "
+        lblComment.Caption = "Commentaire: "
+        lblContractuel.Caption = "Contractuel: "
+        lblCritere.Caption = "CRITERES (Type+Numéro): "
+        lblDelai.Caption = "Délai réception: "
+        lblDiffuse.Caption = "Diffusé: "
+        lblDocNo.Caption = "N° de Document: "
+        lblEtat.Caption = "Etat: "
+        lblEtatDate.Caption = "Date état: "
+        lblIndice.Caption = "Indice: "
+        lblLibelle.Caption = "Libellé: "
+        lblLocal.Caption = "Local(O-N): "
+        lblMark.Caption = "Marquage Pièce: "
+        lblNature.Caption = "Nature: "
+        lblNiveauT.Caption = "Niveau Traitement: "
         lblOA.Caption = "Numéro OA : "
         lblOF.Caption = "Numéro OF : "
-        lblOriginDate.Caption = "Date Origine:"
-        lblProposition.Caption = "Proposition : "
-        lblTransmitted.Caption = "Transmitted pour action : "
-        lblUC.Caption = "UC : "
+        lblOriginDate.Caption = "Date Origine: "
+        lblProposition.Caption = "Proposition: "
+        lblTransmitted.Caption = "Transmitted pour action: "
+        lblUC.Caption = "UC: "
       
         'list
-        lblListCritere.Caption = "N ° Criterion"
+        lblListCritere.Caption = "Critères"
         lblListType.Caption = "Type"
     End If
     
@@ -158,6 +173,8 @@ On Error GoTo ErrHandler
         End If
         
         Call LockedCtl(Me)
+        Set rst1 = Nothing
+        Set rst2 = Nothing
        
        
 
@@ -174,6 +191,8 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+Set rst1 = Nothing
+Set rst2 = Nothing
 'DoCmd.OpenForm "frm_consultation", acNormal
 DoCmd.Close acForm, "frm_DocsManagement"
 
@@ -232,12 +251,6 @@ On Error GoTo ErrHandler
 
     DocNumber = Forms!frm_DocsManagement.OpenArgs
     Call ClearAll(Me)
-
-'    If Len(DocNumber) > 0 Then
-'       TxtDocNo.Value = DocNumber
-'    End If
-
-  
 
 Exit_Sub:
     Exit Sub

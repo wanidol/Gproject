@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_listDocsByID
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -36,7 +51,7 @@ On Error GoTo ErrHandler
         Else
             MsgBox "Invalide Numéro De Document  ", vbOKOnly
         End If
-        
+       
         cmbDocId.SetFocus
         Exit Function
     Else
@@ -64,19 +79,20 @@ On Error GoTo ErrHandler
 'Clear all Controls
 
     Call ClearAll(Me)
+    
 
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Follow-up Document"
-        lblDocID.Caption = "Document Number : "
+        lblHeader.Caption = "Document Follow-up"
+        lblDocID.Caption = "Document Ref :"
         
         'list
-        lblListDoc.Caption = "Document Number"
+        lblListDoc.Caption = "Document Ref"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Status"
         lblListInd.Caption = "Index"
         lblListEtatDate.Caption = "Status Date"
         lblListDesc.Caption = "Description"
-        lblListOriginDate.Caption = "Original Date"
+        lblListOriginDate.Caption = "Origin Date"
         
     Else 'FR
         lblHeader.Caption = "Consultation Suivi Document"
@@ -84,7 +100,7 @@ On Error GoTo ErrHandler
     
         
         'list
-        lblListDoc.Caption = "N° Document"
+        lblListDoc.Caption = "N° de Document"
         lblListNature.Caption = "Nature"
         lblListEtat.Caption = "Etat"
         lblListInd.Caption = "Ind"
@@ -111,20 +127,8 @@ On Error GoTo ErrHandler
             .Open sql, cn, , , adCmdText
         End With
         Set cmbDocId.Recordset = rs1
-'    i = 0
-'
-'        Do While Not rs1.EOF
-'            With rs1
-'                cmbDocId.AddItem (.Fields("NUMERO_DOCUMENT") & ";" & .Fields("LIBELLE_DOCUMENT"))
-'                i = i + 1
-'                rs1.MoveNext
-'            End With
-'
-'        Loop
-'
-'  Debug.Print i
-        
-        'cmbDocId.Selected(0) = True
+        Set rs1 = Nothing
+
         
         With Me.cmbDocId
             .Value = .ItemData(.ListIndex + 1)
@@ -141,14 +145,28 @@ Resume Exit_Sub
 
 End Sub
 
-'Private Sub cmbDocID_Change()
-'Call ClearAll
-'End Sub
+Private Sub cmbDocID_Change()
+On Error GoTo ErrHandler
+
+
+    Call ClearListBox(lstDocument)
+
+Exit_Sub:
+    Exit Sub
+
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Sub
 
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
-DoCmd.OpenForm "frm_consultation", acNormal
-DoCmd.Close acForm, "frm_listDocByID"
+
+    Set rst = Nothing
+    DoCmd.OpenForm "frm_consultation", acNormal
+    DoCmd.Close acForm, "frm_listDocByID"
 
 Exit_Sub:
     Exit Sub
@@ -166,21 +184,16 @@ On Error GoTo ErrHandler
     Dim docNum As String
     Dim i As Integer
 
+   
     If CheckValid() Then
-        docNum = cmbDocId.Column(0)
-'        natureId = cmbNatureID.Value
-'        etatId = cmbEtatID.Value
-    
+        docNum = cmbDocId.Value
       
         If cn.State = adStateOpen Then cn.Close
             Set cn = CurrentProject.AccessConnection
             If rst.State = adStateOpen Then rst.Close
             With rst
             
-            'data test 3 rows => select * from documents where code_repere_marquage='ABQQ' AND code_nature_document='PQP' and code_etat_document = 'FM';
-            'only nature=>SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'pqp'
-            'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' ORDER BY NUMERO_DOCUMENT
-            'SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,INDICE_MODIFICATION,DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT FROM DOCUMENTS Where code_repere_marquage ='ABQQ' And CODE_NATURE_DOCUMENT = 'PQP' And CODE_ETAT_DOCUMENT = 'FM' ORDER BY NUMERO_DOCUMENT
+           
              sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT," & _
                     "CODE_ETAT_DOCUMENT,INDICE_MODIFICATION," & _
                     "DATE_ETAT_DOCUMENT,LIBELLE_DOCUMENT,DATE_ORIGINE_DOCUMENT " & _
@@ -193,7 +206,9 @@ On Error GoTo ErrHandler
             
             'Record Found
             If Not (rst.BOF And rst.EOF) Then
-                Set lstDocument.Recordset = rst
+                lstDocument.RowSource = sql
+                lstDocument.Requery
+                
                 lstDocument.Selected(0) = True
                 lstDocument.Enabled = True
     
@@ -205,9 +220,7 @@ On Error GoTo ErrHandler
                 Else
                     MsgBox "Enregistrement non trouvé", vbOKOnly
                 End If
-                'MsgBox "Record Not Found!", vbOKOnly
-                'Call ClearAll(Me)
-                lstDocument.Enabled = False
+            
                 cmbDocId.SetFocus
  
             End If

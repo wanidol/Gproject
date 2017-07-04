@@ -9,16 +9,53 @@ Public GB_RPT_TITLE As String
 Public GB_LANG As String
 Public GB_cDocs As Collection
 
+Public Function fReturnRecordset(tSql As String, tLst As Variant)
+On Error GoTo ErrHandler
+  
+    'Dim Db As Database
+    Dim rst As New ADODB.Recordset
+    Dim cn As New ADODB.Connection
 
+     
+    If cn.State = adStateOpen Then cn.Close
+        Set cn = CurrentProject.AccessConnection
+        If rst.State = adStateOpen Then rst.Close
+        With rst
+            .CursorType = adOpenDynamic
+            .CursorLocation = adUseClient
+            .LockType = adLockOptimistic
+            .Open tSql, cn, , , adCmdText
+        End With
+        
+        'Record Found
+        If Not (rst.BOF And rst.EOF) Then
+           
+                Set tLst.Recordset = rst
+                Debug.Print rst.RecordCount
+                
+                
+        Else
+           
+           If GB_LANG = "EN" Then
+                MsgBox "Record Not Found!", vbOKOnly
+                                
+           Else
+                MsgBox "Enregistrement non trouvé", vbOKOnly
+           End If
+        
+        End If
+        Set rst = Nothing
+        
+        
+Exit_Sub:
+    Exit Function
+ErrHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description & " in " & _
+    VBE.ActiveCodePane.CodeModule, vbOKOnly, "Error"
+    
+Resume Exit_Sub
+End Function
 
-
-'Public Class Customer
-'    Public Property Name As String
-'    Public Property City As String
-'    Public Property URL As String
-'
-'    Public Property Comments As New List(Of String)
-'End Class
 
 Public Sub InitGlobal()
     'Fr /Eng
@@ -28,16 +65,14 @@ Public Sub InitGlobal()
 
 End Sub
 
-
 Public Sub ClearListBox(lst As ListBox)
 On Error GoTo ErrHandler
-Dim vItem
-With lst
-  For Each vItem In .ItemsSelected
-    .Selected(vItem) = False
-  Next vItem
-End With
 
+    lst.RowSourceType = "Table/Query"
+    lst.RowSource = ""
+    lst.Requery
+    lst.Enabled = False
+    
 Exit_Sub:
     Exit Sub
 
@@ -85,11 +120,19 @@ Dim ctl As Control
 
 For Each ctl In frm.Controls
    Select Case ctl.ControlType
-      Case acTextBox
+        Case acTextBox
            ctl.Value = ""
-      Case acOptionGroup, acComboBox, acListBox
+        Case acOptionGroup, acComboBox, acListBox
           ctl.Value = Null
-      Case acCheckBox
+        
+        Case acListBox
+            ctl.RowSourceType = "Table/Query"
+            ctl.RowSource = ""
+            ctl.Requery
+            ctl.Enabled = False
+            
+
+        Case acCheckBox
          ctl.Value = False
    End Select
 Next

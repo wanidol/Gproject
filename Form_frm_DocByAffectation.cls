@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'---------------------------------------------------------------------------------------
+' Procedure : frm_DocsByAffectation
+' Author    : Wanidol Lievaux
+' Website   : https://www.linkedin.com/in/wanidol-lievaux-0a7bb7124/
+' Purpose   :
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2017-jul-25
+'---------------------------------------------------------------------------------------
+
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -22,65 +37,6 @@ Dim Status As String
 Dim moreSql As String
 Dim publicSql As String
 
-Private Function CreateReport() As Boolean
-
-Dim coll As Collection
-
-
-' Declare the Variable
-    Dim oDocs As clsDocuments
-    
-' Create new Document
-    Set oDocs = New clsDocuments
-    Set GB_cDocs = New Collection
-    
-    CreateReport = False
-
-    If cn.State = adStateOpen Then cn.Close
-    Set cn = CurrentProject.AccessConnection
-    If rst.State = adStateOpen Then rst.Close
-
-    With rst
-        Call BuildSql
-
-        .CursorType = adOpenDynamic
-        .CursorLocation = adUseClient
-        .LockType = adLockOptimistic
-        .Open publicSql, cn, , , adCmdText
-    End With
-    
-    If Not (rst.BOF And rst.EOF) Then
-        CreateReport = True
-        
-        Do While Not (rst.EOF)
-             With rst.Fields
-              oDocs.DocID = Nz(.Item("NUMERO_DOCUMENT").Value, "")
-              oDocs.NatureID = Nz(.Item("CODE_NATURE_DOCUMENT").Value, "")
-              oDocs.Indice = Nz(.Item("INDICE_MODIFICATION").Value, "")
-              oDocs.Libelle = Nz(.Item("LIBELLE_DOCUMENT").Value, "")
-              oDocs.Etat = Nz(.Item("DATE_ETAT_DOCUMENT").Value, "")
-              oDocs.Origin = Nz(.Item("DATE_ORIGINE_DOCUMENT").Value, "")
-              oDocs.Commentaire = Nz(.Item("COMMENTAIRES_SUIVI").Value, "")
-              
-              GB_cDocs.Add oDocs
-            End With
-            rst.MoveNext
-        Loop
-        
-        GB_RPT_TITLE = Nz(cmbAffectID.Value) & ";" & _
-                            Nz(cmbNatureID.Value, "-") & ";" & _
-                            Nz(cmbEtatStart.Value, "-") & ";" & _
-                            Nz(cmbEtatEnd.Value, "-") & ";" & _
-                            Nz(cmbClientLinked.Value, "-") & ";" & _
-                            Nz(cmbComment.Value, "-") & ";"
-'
-'    Else
-'        CreateReport = False
-        
-    End If
-
-
-End Function
 
 Function CheckValid() As Boolean
 On Error GoTo ErrHandler
@@ -90,9 +46,9 @@ On Error GoTo ErrHandler
     If IsNull(cmbAffectID.Value) Or (cmbAffectID.Value = "") Or (cmbAffectID.ListIndex = -1) Then
         
         If GB_LANG = "EN" Then
-            MsgBox "Invalid Affectation Code", vbOKOnly
+            MsgBox "Invalid Assignement Code", vbOKOnly
         Else
-            MsgBox "Invalide Affectation", vbOKOnly
+            MsgBox "Affectation Invalide ", vbOKOnly
         End If
         
         CheckValid = False
@@ -106,7 +62,7 @@ On Error GoTo ErrHandler
         Else
             If Not IsNull(cmbNatureID.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide code de Nature", vbOKOnly
+                    MsgBox "Code de Nature Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid Nature code", vbOKOnly
                 End If
@@ -123,7 +79,7 @@ On Error GoTo ErrHandler
             Else
 '                If Not IsNull(cmbEtatEnd.Value) Then
                     If GB_LANG = "Fr" Then
-                        MsgBox "Invalide date de fin", vbOKOnly
+                        MsgBox "Date de fin Invalide ", vbOKOnly
                     Else
                         MsgBox "Invalid end date", vbOKOnly
                     End If
@@ -135,7 +91,7 @@ On Error GoTo ErrHandler
         Else
             If Not IsNull(cmbEtatStart.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide date de début", vbOKOnly
+                    MsgBox "Date de début Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid start date", vbOKOnly
                 End If
@@ -152,7 +108,7 @@ On Error GoTo ErrHandler
         Else
             If Not IsNull(cmbClientLinked.Value) Then
                 If GB_LANG = "Fr" Then
-                    MsgBox "Invalide lié client", vbOKOnly
+                    MsgBox "Lié client Invalide ", vbOKOnly
                 Else
                     MsgBox "Invalid client linked", vbOKOnly
                 End If
@@ -205,16 +161,16 @@ On Error GoTo ErrHandler
     Call ClearAll(Me)
     
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Documents of an assignment"
+        lblHeader.Caption = "Documents by assignment"
         lblBox1.Caption = "Required information :"
         lblbox2.Caption = "Optional information :"
         lblComment.Caption = "Comment : "
         lblEStart.Caption = "start : "
         lblEStop.Caption = "end : "
-        lblEtat.Caption = "Status : "
+        lblEtat.Caption = "Status"
         lblNature.Caption = "Nature Code : "
         
-        lblAffectation.Caption = "Assignment : "
+        lblAffectation.Caption = "Assignement : "
         lblClientLinked.Caption = "Related to a client : "
         
         
@@ -227,7 +183,7 @@ On Error GoTo ErrHandler
        
         lblEStart.Caption = "début : "
         lblEStop.Caption = "fin : "
-        lblEtat.Caption = "Etat : "
+        lblEtat.Caption = "Etat"
         lblNature.Caption = "Nature : "
         
         lblAffectation.Caption = "Affectation : "
@@ -255,6 +211,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbAffectID.Recordset = rstAffect
+        Set rstAffect = Nothing
         
         'NatureID
         With rstNature
@@ -265,19 +222,9 @@ On Error GoTo ErrHandler
             .Open sql, cn, , , adCmdText
         End With
         
-'        i = 0
-'        Do While Not rstNature.EOF
-'            With rstNature
-'                cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value)
-''                cmbNatureID.List(i, 0) = .Fields("CODE_NATURE_DOCUMENT").Value
-''                cmbNatureID.Column(i, 1) = .Fields("LIBELLE_NATURE_DOCUMENT").Value
-'               ' cmbNatureID.AddItem (.Fields("CODE_NATURE_DOCUMENT").Value & " : " & .Fields("LIBELLE_NATURE_DOCUMENT").Value)
-'                i = i + 1
-'                rstNature.MoveNext
-'            End With
-'
-'        Loop
+
         Set cmbNatureID.Recordset = rstNature
+        Set rstNature = Nothing
         
        'Etat Date
         With rstEtatdate
@@ -290,6 +237,8 @@ On Error GoTo ErrHandler
         
         Set cmbEtatStart.Recordset = rstEtatdate
         Set cmbEtatEnd.Recordset = rstEtatdate
+        Set rstEtatdate = Nothing
+        
         
         cmbEtatEnd.Enabled = False
         
@@ -303,6 +252,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbClientLinked.Recordset = rstClient
+        Set rstClient = Nothing
         
         'comment
         
@@ -315,6 +265,7 @@ On Error GoTo ErrHandler
         End With
         
         Set cmbComment.Recordset = rstComment
+        Set rstComment = Nothing
         
         
         'set focus on Nature Code default first listindex
@@ -364,6 +315,7 @@ End Sub
 Private Sub cmdExit_Click()
 On Error GoTo ErrHandler
 
+    Set rst = Nothing
     DoCmd.OpenForm "frm_workRequest", acNormal
     DoCmd.Close acForm, "frm_DocByAffectation"
 
@@ -383,7 +335,6 @@ On Error GoTo ErrHandler
     
     publicSql = ""
    
-'    AffactID = cmbAffectID.Column(0)
     AffactID = cmbAffectID.Value
  
     publicSql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,INDICE_MODIFICATION," & _
@@ -433,14 +384,12 @@ On Error GoTo ErrHandler
                     Nz(cmbComment.Value, "-") & ";"
         
                 DoCmd.OpenReport "rpt_DocsByAffectation", acViewPreview
-                'DoCmd.Minimize acForm, "frm_DocsByAffectation"
                 PreviousForm = ""
                 PreviousForm = Me.Name
                 
                 DoCmd.Close acForm, "frm_DocByAffectation"
             Else
-                'DoCmd.Close acReport, "rpt_DocsByAffectation", acSaveYes
-                
+                               
                 If GB_LANG = "EN" Then
                     MsgBox "Record Not Found!", vbOKOnly
                 Else
