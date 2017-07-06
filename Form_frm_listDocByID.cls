@@ -24,6 +24,7 @@ Attribute VB_Exposed = False
 ' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
 '                                   runtime doesn't support
 '                                 - changed caption in v.english from assignement to assignment
+'                                 - fixed bug lstDocument not null
 '---------------------------------------------------------------------------------------
 
 Option Compare Database
@@ -264,20 +265,22 @@ On Error GoTo ErrHandler
 Dim passData As String
 
     'passing document number for retriving data in frm_DocsManagement
-    passData = lstDocument.Column(0)
     
+    If Not IsNull(lstDocument.Column(0)) Then
+        passData = lstDocument.Column(0)
+        
+        
+        'for back to previous page
+        
+        PreviousForm = ""
+        
+        PreviousForm = Me.Name
+        
+        DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
     
-    'for back to previous page
-    
-    PreviousForm = ""
-    
-    PreviousForm = Me.Name
-    
-    DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
-    
-    'Hiding form
-    Me.Visible = False
-
+        'Hiding form
+        Me.Visible = False
+    End If
 
 Exit_Sub:
     Exit Sub

@@ -24,7 +24,9 @@ Attribute VB_Exposed = False
 ' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
 '                                   runtime doesn't support
 '                                 - changed caption in v.english from assignement to assignment
-'---------------------------------------------------------------------------------------Option Compare Database
+'                                 - fixed bug lstDocument not null
+'---------------------------------------------------------------------------------------
+Option Compare Database
 Option Explicit
 Dim Db As Database
 Dim rst As New ADODB.Recordset
@@ -376,24 +378,26 @@ ErrHandler:
     
 Resume Exit_Sub
 End Sub
+
 Private Sub lstDocument_DblClick(Cancel As Integer)
 On Error GoTo ErrHandler
 Dim passData As String
 
-    'passing document number for retriving data in frm_DocsManagement
-    passData = lstDocument.Column(0)
-    
-    PreviousForm = ""
-    'for back to previous page
-    
-    'Me.Visible = False
-    PreviousForm = Me.Name
-    
-    DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
-    
-    'Hiding form
-    Me.Visible = False
-
+    If Not IsNull(lstDocument.Column(0)) Then
+        'passing document number for retriving data in frm_DocsManagement
+        passData = lstDocument.Column(0)
+        
+        PreviousForm = ""
+        'for back to previous page
+        
+        'Me.Visible = False
+        PreviousForm = Me.Name
+        
+        DoCmd.OpenForm "frm_DocsManagement", acNormal, , , acFormReadOnly, , passData
+        
+        'Hiding form
+        Me.Visible = False
+    End If
 
 Exit_Sub:
     Exit Sub
