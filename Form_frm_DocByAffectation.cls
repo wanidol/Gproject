@@ -17,11 +17,13 @@ Attribute VB_Exposed = False
 '             copyright notice is left unchanged
 '
 ' Revision History:
-' Rev       Date(yyyy/mm/dd)        Description
+' Rev   App.version    Date(yyyy/mm/dd)        Description
 ' **************************************************************************************
-' 1         2017-jul-25
+' 1         1.0        2017-jul-25
+' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
+'                                   runtime doesn't support
+'                                 - changed caption in v.english from assignement to assignment
 '---------------------------------------------------------------------------------------
-
 Option Compare Database
 Option Explicit
 Dim Db As Database
@@ -46,7 +48,7 @@ On Error GoTo ErrHandler
     If IsNull(cmbAffectID.Value) Or (cmbAffectID.Value = "") Or (cmbAffectID.ListIndex = -1) Then
         
         If GB_LANG = "EN" Then
-            MsgBox "Invalid Assignement Code", vbOKOnly
+            MsgBox "Invalid Assignment Code", vbOKOnly
         Else
             MsgBox "Affectation Invalide ", vbOKOnly
         End If
@@ -170,7 +172,7 @@ On Error GoTo ErrHandler
         lblEtat.Caption = "Status"
         lblNature.Caption = "Nature Code : "
         
-        lblAffectation.Caption = "Assignement : "
+        lblAffectation.Caption = "Assignment : "
         lblClientLinked.Caption = "Related to a client : "
         
         

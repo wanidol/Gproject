@@ -17,9 +17,12 @@ Attribute VB_Exposed = False
 '             copyright notice is left unchanged
 '
 ' Revision History:
-' Rev       Date(yyyy/mm/dd)        Description
+' Rev   App.version    Date(yyyy/mm/dd)        Description
 ' **************************************************************************************
-' 1         2017-jul-25
+' 1         1.0        2017-jul-25
+' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
+'                                   runtime doesn't support
+'                                 - changed caption in v.english from assignement to assignment
 '---------------------------------------------------------------------------------------
 
 Option Compare Database
@@ -123,7 +126,7 @@ On Error GoTo ErrHandler
         lblNature.Caption = "Document List by Nature"
         lblMark.Caption = "Document List by Stamp"
         lblCritere.Caption = "Document List by Criteria"
-        lblAffectation.Caption = "Document List by Assignement"
+        lblAffectation.Caption = "Document List by Assignment"
     Else 'FR
         lblHeader.Caption = "Demandes de travaux"
         lblNature.Caption = "Liste des documents d'une nature"

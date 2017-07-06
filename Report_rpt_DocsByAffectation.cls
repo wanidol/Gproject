@@ -17,9 +17,12 @@ Attribute VB_Exposed = False
 '             copyright notice is left unchanged
 '
 ' Revision History:
-' Rev       Date(yyyy/mm/dd)        Description
+' Rev   App.version    Date(yyyy/mm/dd)        Description
 ' **************************************************************************************
-' 1         2017-jul-25
+' 1         1.0        2017-jul-25
+' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
+'                                   runtime doesn't support
+'                                 - changed caption in v.english from assignement to assignment
 '---------------------------------------------------------------------------------------
 
 Option Compare Database
@@ -49,11 +52,11 @@ On Error GoTo ErrHandler
     
     If GB_LANG = "EN" Then
     
-        lblRHAffect.Caption = "Assignement Code : "
+        lblRHAffect.Caption = "Assignment Code : "
         lblRHEnd.Caption = "end"
         lblRHComment.Caption = "Comment : "
         lblRHClientLinked.Caption = "Related to customers : "
-        lblRHeader.Caption = "Document List by Assignement"
+        lblRHeader.Caption = "Document List by Assignment"
         lblRHEtat.Caption = "Status start : "
         lblRHNature.Caption = "Nature Code : "
         
@@ -64,7 +67,7 @@ On Error GoTo ErrHandler
         lblHIndex.Caption = "Index"
         lblHnature.Caption = "Nature Code"
         lblHOrigin.Caption = "Date Origin"
-        lblHAffectation.Caption = "Assignement"
+        lblHAffectation.Caption = "Assignment"
         
         lblNoRecord.Caption = "Number Of Record"
         

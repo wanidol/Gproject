@@ -18,11 +18,13 @@ Attribute VB_Exposed = False
 '
 ' Revision History:
 ' Rev       Date(yyyy/mm/dd)        Description
+' Rev   App.version    Date(yyyy/mm/dd)        Description
 ' **************************************************************************************
-' 1         2017-jul-25
-'---------------------------------------------------------------------------------------
-
-Option Compare Database
+' 1         1.0        2017-jul-25
+' 2         2.0        05/07/2017 - Changed font family from copper black to Arial black because
+'                                   runtime doesn't support
+'                                 - changed caption in v.english from assignement to assignment
+'---------------------------------------------------------------------------------------Option Compare Database
 Option Explicit
 Dim Db As Database
 Dim rst As New ADODB.Recordset
