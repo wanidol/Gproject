@@ -88,7 +88,7 @@ On Error GoTo ErrHandler
         lblCritere.Caption = "CRITERES (Type+Numéro): "
         lblDelai.Caption = "Délai réception: "
         lblDiffuse.Caption = "Diffusé: "
-        lblDocNo.Caption = "N° de Document: "
+        lblDocNo.Caption = "N°Document: "
         lblEtat.Caption = "Etat: "
         lblEtatDate.Caption = "Date état: "
         lblIndice.Caption = "Indice: "
