@@ -251,8 +251,10 @@ End Sub
 Private Sub Form_Open(Cancel As Integer)
 On Error GoTo ErrHandler
 
-    DocNumber = Forms!frm_DocsManagement.OpenArgs
-    Call ClearAll(Me)
+    If Not IsNull(Forms!frm_DocsManagement.OpenArgs) Then
+        DocNumber = Forms!frm_DocsManagement.OpenArgs
+        Call ClearAll(Me)
+    End If
 
 Exit_Sub:
     Exit Sub
