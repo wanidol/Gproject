@@ -231,7 +231,7 @@ On Error GoTo ErrHandler
         lblCritere.Caption = "Criteria : "
         
     Else 'FR
-        lblHeader.Caption = "Liste des documents d'un marquage de pièce"
+        lblHeader.Caption = "Documents d'un marquage de pièce"
         lblBox1.Caption = "Informations obligatoires :"
         lblbox2.Caption = "Informations facultatives :"
         lblMark.Caption = "Marquage de pièce: "

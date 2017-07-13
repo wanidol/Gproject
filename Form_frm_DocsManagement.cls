@@ -49,7 +49,7 @@ On Error GoTo ErrHandler
     Dim docNum As String
     
     If GB_LANG = "EN" Then
-        lblHeader.Caption = "Quality Document Management: "
+        lblHeader.Caption = "Quality Document Management "
         lblAccord.Caption = "Customer Agreement: "
         lblAffection.Caption = "Assignment: "
         lblAvis.Caption = "Customer reviews: "
