@@ -50,56 +50,57 @@ On Error GoTo ErrHandler
     Dim strOpenArgs() As String
     Dim Str As String
     
-    If GB_LANG = "EN" Then
-    
-        lblRHAffect.Caption = "Assignment Code : "
-        lblRHEnd.Caption = "end"
-        lblRHComment.Caption = "Comment : "
-        lblRHClientLinked.Caption = "Related to customers : "
-        lblRHeader.Caption = "Document List by Assignment"
-        lblRHEtat.Caption = "Status start : "
-        lblRHNature.Caption = "Nature Code : "
+    If Not IsNull(GB_LANG) And Not (GB_LANG = "") Then
+        If GB_LANG = "EN" Then
         
-        lblHComment.Caption = "Comment"
-        lblHDesc.Caption = "Description"
-        lblHDocNo.Caption = "Document Ref"
-        lblHEtat.Caption = "Status"
-        lblHIndex.Caption = "Index"
-        lblHnature.Caption = "Nature Code"
-        lblHOrigin.Caption = "Date Origin"
-        lblHAffectation.Caption = "Assignment"
+            lblRHAffect.Caption = "Assignment Code : "
+            lblRHEnd.Caption = "end"
+            lblRHComment.Caption = "Comment : "
+            lblRHClientLinked.Caption = "Related to customers : "
+            lblRHeader.Caption = "Document List by Assignment"
+            lblRHEtat.Caption = "Status start : "
+            lblRHNature.Caption = "Nature Code : "
+            
+            lblHComment.Caption = "Comment"
+            lblHDesc.Caption = "Description"
+            lblHDocNo.Caption = "Document Ref"
+            lblHEtat.Caption = "Status"
+            lblHIndex.Caption = "Index"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Date Origin"
+'            lblHAffectation.Caption = "Assignment"
+            
+            lblNoRecord.Caption = "Number Of Record"
+            
+            
+        Else 'FR
         
-        lblNoRecord.Caption = "Number Of Record"
+            lblRHAffect.Caption = "Affectation : "
+            lblRHEnd.Caption = "fin"
+            lblRHComment.Caption = "Commentaires : "
+            lblRHClientLinked.Caption = "Liés à un client : "
+            lblRHeader.Caption = "Liste des documents d'une affectation"
+            lblRHEtat.Caption = "Etat début: "
+            lblRHNature.Caption = "Nature : "
+            
+            lblHComment.Caption = "Commentaires"
+            lblHDesc.Caption = "Libellé du document"
+            lblHDocNo.Caption = "N° de Document"
+            lblHEtat.Caption = "Etat"
+            lblHIndex.Caption = "Indice"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Origine"
+'            lblHAffectation.Caption = "Affectation"
+            
+            lblNoRecord.Caption = "Nombre d'enregistrement"
         
         
-    Else 'FR
-    
-        lblRHAffect.Caption = "Affectation : "
-        lblRHEnd.Caption = "fin"
-        lblRHComment.Caption = "Commentaires : "
-        lblRHClientLinked.Caption = "Liés à un client : "
-        lblRHeader.Caption = "Liste des documents d'une affectation"
-        lblRHEtat.Caption = "Etat début: "
-        lblRHNature.Caption = "Nature : "
-        
-        lblHComment.Caption = "Commentaires"
-        lblHDesc.Caption = "Libellé du document"
-        lblHDocNo.Caption = "N° de Document"
-        lblHEtat.Caption = "Etat"
-        lblHIndex.Caption = "Indice"
-        lblHnature.Caption = "Nature"
-        lblHOrigin.Caption = "Date"
-        lblHAffectation.Caption = "Affectation"
-        
-        lblNoRecord.Caption = "Nombre d'enregistrement"
-    
-    
+        End If
     End If
+        
     
     
-    
-    
-    If Not IsNull(GB_RPT_TITLE) Then
+    If Not IsNull(GB_RPT_TITLE) And Not (GB_RPT_TITLE = "") Then
              
         strOpenArgs = Split(GB_RPT_TITLE, ";")
         Me.lblAffectID.Caption = strOpenArgs(0)

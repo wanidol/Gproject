@@ -68,61 +68,63 @@ On Error GoTo ErrHandler
     Dim strOpenArgs() As String
     Dim Str As String
    
-    If GB_LANG = "EN" Then
+    If Not IsNull(GB_LANG) And Not (GB_LANG = "") Then
+        If GB_LANG = "EN" Then
         
-        lblRHComment.Caption = "Comment : "
-        lblRHCritere.Caption = "Criteria :"
-        lblRHeader.Caption = "Document List by stamp"
-        lblRHEtat.Caption = "Etat début "
-        lblRHMarkID.Caption = "Mark Code : "
-        lblRHEnd1.Caption = "end "
-        lblRHEnd1.Caption = "end "
-        lblRHNatureID.Caption = "Nature documents : "
-        lblRHOrigin.Caption = "Date start "
+            lblRHComment.Caption = "Comment : "
+            lblRHCritere.Caption = "Criteria :"
+            lblRHeader.Caption = "Document List by stamp"
+            lblRHEtat.Caption = "Etat début "
+            lblRHMarkID.Caption = "Mark Code : "
+            lblRHEnd1.Caption = "end "
+            lblRHEnd1.Caption = "end "
+            lblRHNatureID.Caption = "Nature documents : "
+            lblRHOrigin.Caption = "Date start "
+            
+           
+    '        lblHCritere.Caption = "Criteria"
+            'lblHmark.Caption = "Mark Code"
+            lblHComment.Caption = "Comment"
+            lblHDesc.Caption = "Description"
+            lblHDocNo.Caption = "Document Ref"
+            lblHEtat.Caption = "Status"
+            lblHIndex.Caption = "Index"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Date Origin"
+            
+            lblNoRecord.Caption = "Number Of Record"
+            
+        Else 'FR
         
+            lblRHComment.Caption = "Commentaires : "
+            lblRHCritere.Caption = "Critères :"
+            lblRHeader.Caption = "liste des documents d'un marquage"
+            lblRHEtat.Caption = "Etat début "
+            lblRHMarkID.Caption = "Marquage de pièce : "
+            lblRHEnd1.Caption = "fin "
+            lblRHEnd1.Caption = "fin "
+            lblRHNatureID.Caption = "Nature documents : "
+            lblRHOrigin.Caption = "Date début "
+            
        
-'        lblHCritere.Caption = "Criteria"
-        lblHmark.Caption = "Mark Code"
-        lblHComment.Caption = "Comment"
-        lblHDesc.Caption = "Description"
-        lblHDocNo.Caption = "Document Ref"
-        lblHEtat.Caption = "Status"
-        lblHIndex.Caption = "Index"
-        lblHnature.Caption = "Nature Code"
-        lblHOrigin.Caption = "Date Origin"
+    '
+    '        lblHCritere.Caption = "Critères"
+            'lblHmark.Caption = "Marquage"
+            lblHComment.Caption = "Commentaire"
+            lblHDesc.Caption = "Libellé du document"
+            lblHDocNo.Caption = "N° de Document"
+            lblHEtat.Caption = "Etat"
+            lblHIndex.Caption = "Indice"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Origine"
+            
+            lblNoRecord.Caption = "Nombre d'enregistrement"
         
-        lblNoRecord.Caption = "Number Of Record"
-        
-    Else 'FR
-    
-        lblRHComment.Caption = "Commentaires : "
-        lblRHCritere.Caption = "Critères :"
-        lblRHeader.Caption = "liste des documents d'un marquage"
-        lblRHEtat.Caption = "Etat début "
-        lblRHMarkID.Caption = "Marquage de pièce : "
-        lblRHEnd1.Caption = "fin "
-        lblRHEnd1.Caption = "fin "
-        lblRHNatureID.Caption = "Nature documents : "
-        lblRHOrigin.Caption = "Date début "
-        
-   
-'
-'        lblHCritere.Caption = "Critères"
-        lblHmark.Caption = "Marquage"
-        lblHComment.Caption = "Commentaire"
-        lblHDesc.Caption = "Libellé du document"
-        lblHDocNo.Caption = "N° de Document"
-        lblHEtat.Caption = "Etat"
-        lblHIndex.Caption = "Indice"
-        lblHnature.Caption = "Nature"
-        lblHOrigin.Caption = "Origine Date"
-        
-        lblNoRecord.Caption = "Nombre d'enregistrement"
+        End If
     
     End If
     
-    
-    If Not IsNull(GB_RPT_TITLE) Then
+    If Not IsNull(GB_RPT_TITLE) And Not (GB_RPT_TITLE = "") Then
       strOpenArgs = Split(GB_RPT_TITLE, ";")
       Me.lblMarkID.Caption = strOpenArgs(0)
       Me.lblNatureID.Caption = strOpenArgs(1)

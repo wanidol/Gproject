@@ -48,57 +48,59 @@ On Error GoTo ErrHandler
     Dim strOpenArgs() As String
     Dim Str As String
     
-    If GB_LANG = "EN" Then
+    If Not IsNull(GB_LANG) And Not (GB_LANG = "") Then
+        If GB_LANG = "EN" Then
     
-        lblRHType.Caption = "Type :"
-        lblRHCritere.Caption = "Criteria N°:"
-        lblRHNature.Caption = "Nature : "
-        lblRHEnd1.Caption = "end"
-        lblRHEnd1.Caption = "end"
-        lblRHComment.Caption = "Comment : "
-        lblRHeader.Caption = "Document List by criteria"
-        lblRHEtat.Caption = "Status start: "
-        lblRHOrigin.Caption = "Date start: "
-        
-               
-
-        lblHComment.Caption = "Comment"
-        lblHDesc.Caption = "Description"
-        lblHDocNo.Caption = "Document Ref"
-        lblHEtat.Caption = "Status"
-        lblHIndex.Caption = "Index"
-        lblHnature.Caption = "Nature Code"
-        lblHOrigin.Caption = "Date Origin"
-        
-        lblNoRecord.Caption = "Number Of Record"
-        
-    Else 'FR
+            lblRHType.Caption = "Type :"
+            lblRHCritere.Caption = "Criteria N°:"
+            lblRHNature.Caption = "Nature : "
+            lblRHEnd1.Caption = "end"
+            lblRHEnd1.Caption = "end"
+            lblRHComment.Caption = "Comment : "
+            lblRHeader.Caption = "Document List by criteria"
+            lblRHEtat.Caption = "Status start: "
+            lblRHOrigin.Caption = "Date start: "
+            
+                   
     
-        lblRHType.Caption = "Type"
-        lblRHCritere.Caption = "N° critère :"
-        lblRHNature.Caption = "Nature : "
-        lblRHEnd1.Caption = "fin "
-        lblRHEnd1.Caption = "fin "
-        lblRHComment.Caption = "Commentaires : "
-        lblRHeader.Caption = "Liste des documents d'un critère"
-        lblRHEtat.Caption = "Status début : "
-        lblRHOrigin.Caption = "Date début : "
+            lblHComment.Caption = "Comment"
+            lblHDesc.Caption = "Description"
+            lblHDocNo.Caption = "Document Ref"
+            lblHEtat.Caption = "Status"
+            lblHIndex.Caption = "Index"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Date Origin"
+            
+            lblNoRecord.Caption = "Number Of Record"
         
-
-        lblHComment.Caption = "Commentaires"
-        lblHDesc.Caption = "Libellé du document"
-        lblHDocNo.Caption = "N° de Document"
-        lblHEtat.Caption = "Etat"
-        lblHIndex.Caption = "Indice"
-        lblHnature.Caption = "Nature"
-        lblHOrigin.Caption = "Origine"
-        
-         lblNoRecord.Caption = "Nombre d'enregistrement"
+        Else 'FR
     
+            lblRHType.Caption = "Type"
+            lblRHCritere.Caption = "N° critère :"
+            lblRHNature.Caption = "Nature : "
+            lblRHEnd1.Caption = "fin "
+            lblRHEnd1.Caption = "fin "
+            lblRHComment.Caption = "Commentaires : "
+            lblRHeader.Caption = "Liste des documents d'un critère"
+            lblRHEtat.Caption = "Status début : "
+            lblRHOrigin.Caption = "Date début : "
+            
+    
+            lblHComment.Caption = "Commentaires"
+            lblHDesc.Caption = "Libellé du document"
+            lblHDocNo.Caption = "N° de Document"
+            lblHEtat.Caption = "Etat"
+            lblHIndex.Caption = "Indice"
+            lblHnature.Caption = "Nature"
+            lblHOrigin.Caption = "Origine"
+            
+             lblNoRecord.Caption = "Nombre d'enregistrement"
+    
+        End If
     End If
     
     
-    If Not IsNull(GB_RPT_TITLE) Then
+   If Not IsNull(GB_RPT_TITLE) And Not (GB_RPT_TITLE = "") Then
       strOpenArgs = Split(GB_RPT_TITLE, ";")
       Me.lblTypeID.Caption = strOpenArgs(0)
       Me.lblCritereID.Caption = strOpenArgs(1)
