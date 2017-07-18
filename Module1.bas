@@ -31,7 +31,7 @@ On Error GoTo ErrHandler
         If Not (rst.BOF And rst.EOF) Then
            
                 Set tLst.Recordset = rst
-                Debug.Print rst.RecordCount
+'                Debug.Print rst.RecordCount
                 
                 
         Else

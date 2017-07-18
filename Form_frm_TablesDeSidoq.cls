@@ -115,6 +115,7 @@ Private Sub TabCtl_Change()
             Case 4
               ' Nature
                 lstNature.ColumnCount = 11
+                lstNature.ColumnWidths = "4.2cm;8.4cm"
                 sql = "SELECT * FROM  NATURES_DOCUMENT ORDER BY CODE_NATURE_DOCUMENT "
                 Call fReturnRecordset(sql, lstNature)
             
@@ -127,6 +128,7 @@ Private Sub TabCtl_Change()
             Case 6
                 'TypeCritere
                 lstType.ColumnCount = 7
+                lstType.ColumnWidths = "6.6cm;6.6cm;6.6cm;12.12cm"
                 sql = "SELECT * FROM  TYPES_CRITERES_NATURE ORDER BY CODE_NATURE_DOCUMENT"
                 Call fReturnRecordset(sql, lstType)
             
@@ -139,6 +141,8 @@ Private Sub TabCtl_Change()
             Case 8
                 'Documents
                 lstDocument.ColumnCount = 11
+                lstDocument.ColumnWidths = "4.2cm;4.2cm;2.1cm;4.2cm;2.1cm;8.4cm;4.2cm;4.2cm;8.4cm"
+                
                  sql = "SELECT NUMERO_DOCUMENT,CODE_NATURE_DOCUMENT,CODE_ETAT_DOCUMENT,CODE_AFFECTATION," & _
                         "INDICE_MODIFICATION,LIBELLE_DOCUMENT,DATE_ETAT_DOCUMENT,DATE_ORIGINE_DOCUMENT," & _
                         "COMMENTAIRES_SUIVI,CODE_REPERE_MARQUAGE,CONTRACTUEL " & _

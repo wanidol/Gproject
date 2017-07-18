@@ -513,7 +513,7 @@ On Error GoTo ErrHandler
                 PreviousForm = Me.Name
                 
                 DoCmd.Close acForm, "frm_DocByMark"
-                Debug.Print ("1")
+'                Debug.Print ("1")
                 
             
             Else
